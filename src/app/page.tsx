@@ -1,4 +1,4 @@
-import LandingPage from '@/src/client/markating/LandingPage';
+import LandingPage from '@/client/markating/LandingPage';
 
 export default function Home() {
   return (
