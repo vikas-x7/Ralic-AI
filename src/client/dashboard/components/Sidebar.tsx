@@ -27,7 +27,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="flex w-64 flex-col border-r border-gray-200 bg-white">
+    <aside className="flex w-64 flex-col border-r border-gray-700 bg-gray-800">
       <div className="p-4">
         <button
           onClick={handleNewChat}
@@ -56,10 +56,10 @@ export default function Sidebar() {
             <button
               key={chat.id}
               onClick={() => handleChatClick(chat.id)}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-200 transition-colors hover:bg-gray-700"
             >
               <svg
-                className="h-4 w-4 flex-shrink-0 text-gray-400"
+                className="h-4 w-4 flex-shrink-0 text-gray-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -78,7 +78,7 @@ export default function Sidebar() {
       </div>
 
       <div className="border-t border-gray-200 p-4">
-        <p className="text-xs text-gray-500">v0.1.0</p>
+        <p className="text-xs text-gray-400">v0.1.0</p>
       </div>
     </aside>
   );
