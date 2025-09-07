@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ReactFlow,
   addEdge,
@@ -10,6 +10,7 @@ import {
   Controls,
   ConnectionMode,
   ReactFlowProvider,
+  useReactFlow,
   type Node,
   type Edge,
   type Connection,
@@ -34,13 +35,7 @@ const initialNodes: Node<ChatNodeData>[] = [
 function ChatCanvasInner() {
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragPosition, setDragPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+  const { screenToFlowPosition } = useReactFlow();
 
   const onNodesChange = useCallback(
     (changes: NodeChange<Node<ChatNodeData>>[]) => {
@@ -51,114 +46,65 @@ function ChatCanvasInner() {
 
   const onConnect = useCallback(
     (params: Connection) => {
-      if (!params.target) {
-        const newNodeId = crypto.randomUUID();
-        const reactFlowBounds =
-          reactFlowWrapper.current?.getBoundingClientRect();
-        if (!reactFlowBounds) return;
+      setEdges((eds) => addEdge(params, eds));
+    },
+    [setEdges]
+  );
 
-        const position = {
-          x: dragPosition?.x || reactFlowBounds.width / 2 - 150,
-          y: dragPosition?.y || reactFlowBounds.height / 2 - 50,
-        };
+  const onConnectEnd = useCallback(
+    (event: any, connectionState: any) => {
+      if (!connectionState.isValid && connectionState.fromNode) {
+        const id = crypto.randomUUID();
+        const clientX =
+          'clientX' in event
+            ? event.clientX
+            : event.changedTouches?.[0]?.clientX;
+        const clientY =
+          'clientY' in event
+            ? event.clientY
+            : event.changedTouches?.[0]?.clientY;
+
+        if (clientX === undefined || clientY === undefined) return;
+
+        const position = screenToFlowPosition({ x: clientX, y: clientY });
 
         const newNode: Node<ChatNodeData> = {
-          id: newNodeId,
+          id,
           type: 'chatNode',
           position,
-          data: { customId: newNodeId },
+          data: { customId: id },
         };
 
-        setNodes((nds) => [...nds, newNode]);
+        setNodes((nds) => nds.concat(newNode));
         setEdges((eds) =>
-          addEdge(
-            {
-              ...params,
-              target: newNodeId,
-            },
-            eds
-          )
+          eds.concat({
+            id: `e-${connectionState.fromNode.id}-${id}`,
+            source: connectionState.fromNode.id,
+            sourceHandle: connectionState.fromHandle?.id || null,
+            target: id,
+            type: 'floating',
+          })
         );
-      } else {
-        setEdges((eds) => addEdge(params, eds));
       }
     },
-    [dragPosition, setNodes, setEdges]
+    [screenToFlowPosition, setNodes, setEdges]
   );
-
-  const onMouseMove = useCallback(
-    (event: React.MouseEvent) => {
-      if (isDragging && reactFlowWrapper.current && reactFlowInstance) {
-        const bounds = reactFlowWrapper.current.getBoundingClientRect();
-        const position = reactFlowInstance.screenToFlowPosition({
-          x: event.clientX - bounds.left,
-          y: event.clientY - bounds.top,
-        });
-        setDragPosition(position);
-      }
-    },
-    [isDragging, reactFlowInstance]
-  );
-
-  const onMouseUp = useCallback(() => {
-    setIsDragging(false);
-    setDragPosition(null);
-  }, []);
-
-  const onConnectStart = useCallback(() => {
-    setIsDragging(true);
-  }, []);
-
-  const onConnectEnd = useCallback(() => {
-    if (isDragging && dragPosition) {
-      const newNodeId = crypto.randomUUID();
-      const newNode: Node<ChatNodeData> = {
-        id: newNodeId,
-        type: 'chatNode',
-        position: dragPosition,
-        data: { customId: newNodeId },
-      };
-
-      const sourceNode = nodes[nodes.length - 1];
-      if (sourceNode) {
-        setNodes((nds) => [...nds, newNode]);
-        setEdges((eds) => [
-          ...eds,
-          {
-            id: `e-${sourceNode.id}-${newNodeId}`,
-            source: sourceNode.id,
-            target: newNodeId,
-            type: 'smoothstep',
-          },
-        ]);
-      }
-    }
-    setIsDragging(false);
-    setDragPosition(null);
-  }, [isDragging, dragPosition, nodes, setNodes, setEdges]);
 
   return (
-    <div
-      ref={reactFlowWrapper}
-      className="h-full w-full"
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-    >
+    <div className="h-full w-full">
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onConnectStart={onConnectStart}
         onConnectEnd={onConnectEnd}
-        onInit={setReactFlowInstance}
         nodeTypes={nodeTypes}
         fitView
         connectionMode={ConnectionMode.Loose}
         className="bg-gray-900"
         defaultEdgeOptions={{
-          type: 'smoothstep',
+          type: 'default',
         }}
       >
         <Background className="bg-gray-900" />
