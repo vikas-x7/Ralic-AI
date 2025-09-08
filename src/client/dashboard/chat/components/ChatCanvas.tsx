@@ -91,7 +91,7 @@ function ChatCanvasInner() {
   );
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full bg-[#0E0E0E]">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -104,11 +104,11 @@ function ChatCanvasInner() {
         connectionMode={ConnectionMode.Loose}
         className="bg-gray-900"
         defaultEdgeOptions={{
-          type: 'default',
+          type: 'floating',
         }}
       >
-        <Background className="bg-gray-900" />
-        <Controls className="!border-gray-700 !bg-gray-800 [&>button]:!border-gray-700 [&>button]:!bg-gray-800 [&>button>svg]:!fill-gray-300" />
+        
+        
       </ReactFlow>
     </div>
   );

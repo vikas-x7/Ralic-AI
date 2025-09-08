@@ -16,15 +16,11 @@ export default function ChatNode({ id }: NodeProps<Node<ChatNodeData>>) {
   };
 
   return (
-    <div className="min-w-[300px] rounded-lg border border-gray-600 bg-gray-800 shadow-md">
-      <Handle
-        type="target"
-        position={Position.Top}
-        className="!h-3 !w-3 !bg-blue-500"
-      />
+    <div className="min-w-[300px] rounded-lg bg-[#171717]">
+
 
       <div className="p-4">
-        <div className="mb-3 flex items-center justify-between border-b border-gray-700 pb-2">
+        <div className="mb-3 flex items-center justify-between  pb-2">
           <span className="text-sm font-medium text-gray-200">Chat Node</span>
           <span className="text-xs text-gray-500">{id.slice(0, 8)}</span>
         </div>
@@ -45,7 +41,7 @@ export default function ChatNode({ id }: NodeProps<Node<ChatNodeData>>) {
 
           <button
             onClick={handleSend}
-            className="w-full rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            className="w-full rounded-md bg-black px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
           >
             Send
           </button>
@@ -63,7 +59,8 @@ export default function ChatNode({ id }: NodeProps<Node<ChatNodeData>>) {
 
       <Handle
         type="source"
-        position={Position.Bottom}
+       
+        position={Position.Top}
         className="!h-3 !w-3 !bg-blue-500"
       />
     </div>

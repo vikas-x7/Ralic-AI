@@ -27,7 +27,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="flex w-64 flex-col border-r border-gray-700 bg-gray-800">
+    <aside className="flex w-60 flex-col border-r border-[#252525]  bg-[#050505]">
       <div className="p-4">
         <button
           onClick={handleNewChat}
@@ -77,9 +77,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <div className="border-t border-gray-200 p-4">
-        <p className="text-xs text-gray-400">v0.1.0</p>
-      </div>
+     
     </aside>
   );
 }
