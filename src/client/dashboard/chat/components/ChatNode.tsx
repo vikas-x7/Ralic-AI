@@ -2,6 +2,7 @@
 
 import { Handle, Position, NodeProps, Node } from '@xyflow/react';
 import { useState } from 'react';
+import { FiDownload, FiCopy, FiTrash2, FiChevronDown } from 'react-icons/fi';
 
 export type ChatNodeData = { customId: string };
 
@@ -16,52 +17,67 @@ export default function ChatNode({ id }: NodeProps<Node<ChatNodeData>>) {
   };
 
   return (
-    <div className="min-w-[300px] rounded-lg bg-[#171717]">
-
-
-      <div className="p-4">
-        <div className="mb-3 flex items-center justify-between  pb-2">
-          <span className="text-sm font-medium text-gray-200">Chat Node</span>
-          <span className="text-xs text-gray-500">{id.slice(0, 8)}</span>
+    <div className="w-[420px] rounded-[5px] border border-[#2a2a2a] bg-[#0b0b0b] shadow-xl">
+      {/* Top bar */}
+      <div className="flex items-center justify-between border-b border-[#1f1f1f] px-4 py-2">
+        <div className="flex items-center gap-2 text-sm text-gray-300">
+          <div className="flex h-5 w-5 items-center justify-center rounded border border-gray-500 text-xs">
+            B
+          </div>
+          <span>untitled</span>
         </div>
 
-        <div className="space-y-3">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
-            className="min-h-[80px] w-full resize-none rounded-md border border-gray-600 bg-gray-700 p-2 text-sm text-gray-100 placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-          />
-
-          <button
-            onClick={handleSend}
-            className="w-full rounded-md bg-black px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-          >
-            Send
-          </button>
-
-          {response && (
-            <div className="rounded-md bg-gray-700 p-3">
-              <p className="mb-1 text-xs font-medium text-gray-400">
-                AI Response:
-              </p>
-              <p className="text-sm text-gray-200">{response}</p>
-            </div>
-          )}
+        <div className="flex items-center gap-3 text-gray-400">
+          <FiDownload className="cursor-pointer hover:text-white" />
+          <FiCopy className="cursor-pointer hover:text-white" />
+          <FiTrash2 className="cursor-pointer hover:text-red-500" />
         </div>
       </div>
 
+      {/* Input */}
+      <div className="p-4">
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask a question..."
+          className="min-h-[140px] w-full resize-none bg-transparent text-sm text-gray-200 placeholder-gray-500 outline-none"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+        />
+
+        {/* Bottom bar */}
+        <div className="mt-4 flex items-center justify-between text-xs text-gray-400">
+          <div className="flex cursor-pointer items-center gap-1 hover:text-white">
+            <span>gpt-4o</span>
+            <FiChevronDown />
+          </div>
+
+          <button
+            onClick={handleSend}
+            className="flex items-center gap-1 text-gray-300 hover:text-white"
+          >
+            Ask ⌘↵
+          </button>
+        </div>
+      </div>
+
+      {/* Response */}
+      {response && (
+        <div className="px-4 pb-4">
+          <div className="rounded-lg bg-[#1a1a1a] p-3 text-sm text-gray-200">
+            {response}
+          </div>
+        </div>
+      )}
+
       <Handle
         type="source"
-       
         position={Position.Top}
-        className="!h-3 !w-3 !bg-blue-500"
+        className="!absolute !top-0 !right-0 !h-3 !w-3 !bg-blue-500"
       />
     </div>
   );

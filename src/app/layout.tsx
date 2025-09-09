@@ -1,6 +1,12 @@
 import type { Metadata } from 'next';
+import { DM_Sans } from 'next/font/google';
 import '@xyflow/react/dist/style.css';
 import './globals.css';
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -14,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className={`${dmSans.className} flex min-h-full flex-col`}>
+        {children}
+      </body>
     </html>
   );
 }

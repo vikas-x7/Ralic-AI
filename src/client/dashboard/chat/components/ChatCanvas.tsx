@@ -91,7 +91,7 @@ function ChatCanvasInner() {
   );
 
   return (
-    <div className="h-full w-full bg-[#0E0E0E]">
+    <div className="h-full w-full bg-black">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -106,10 +106,7 @@ function ChatCanvasInner() {
         defaultEdgeOptions={{
           type: 'floating',
         }}
-      >
-        
-        
-      </ReactFlow>
+      ></ReactFlow>
     </div>
   );
 }
