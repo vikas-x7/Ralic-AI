@@ -3,7 +3,7 @@
 import { Handle, Position, NodeProps, Node } from '@xyflow/react';
 import { useState } from 'react';
 import { FiDownload, FiCopy, FiTrash2, FiChevronDown } from 'react-icons/fi';
-
+import { IoMdArrowUp } from 'react-icons/io';
 export type ChatNodeData = { customId: string };
 
 export default function ChatNode({ id }: NodeProps<Node<ChatNodeData>>) {
@@ -17,20 +17,11 @@ export default function ChatNode({ id }: NodeProps<Node<ChatNodeData>>) {
   };
 
   return (
-    <div className="w-[420px] rounded-[5px] border border-[#2a2a2a] bg-[#0b0b0b] shadow-xl">
+    <div className="w-[520px] rounded-[5px] border border-[#2a2a2a] bg-[#0b0b0b] shadow-xl">
       {/* Top bar */}
-      <div className="flex items-center justify-between border-b border-[#1f1f1f] px-4 py-2">
+      <div className="flex items-center justify-between border-b border-[#1f1f1f] px-8 py-2">
         <div className="flex items-center gap-2 text-sm text-gray-300">
-          <div className="flex h-5 w-5 items-center justify-center rounded border border-gray-500 text-xs">
-            B
-          </div>
           <span>untitled</span>
-        </div>
-
-        <div className="flex items-center gap-3 text-gray-400">
-          <FiDownload className="cursor-pointer hover:text-white" />
-          <FiCopy className="cursor-pointer hover:text-white" />
-          <FiTrash2 className="cursor-pointer hover:text-red-500" />
         </div>
       </div>
 
@@ -40,7 +31,7 @@ export default function ChatNode({ id }: NodeProps<Node<ChatNodeData>>) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask a question..."
-          className="min-h-[140px] w-full resize-none bg-transparent text-sm text-gray-200 placeholder-gray-500 outline-none"
+          className="min-h-[10px] w-full resize-none bg-transparent text-sm text-gray-200 placeholder-gray-500 outline-none"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -58,9 +49,9 @@ export default function ChatNode({ id }: NodeProps<Node<ChatNodeData>>) {
 
           <button
             onClick={handleSend}
-            className="flex items-center gap-1 text-gray-300 hover:text-white"
+            className="flex items-center gap-1 rounded-full bg-white/40 p-1.5 text-black hover:text-white"
           >
-            Ask ⌘↵
+            <IoMdArrowUp />
           </button>
         </div>
       </div>
@@ -76,8 +67,33 @@ export default function ChatNode({ id }: NodeProps<Node<ChatNodeData>>) {
 
       <Handle
         type="source"
-        position={Position.Top}
-        className="!absolute !top-0 !right-0 !h-3 !w-3 !bg-blue-500"
+        id="image"
+        position={Position.Right}
+        style={{
+          width: 17,
+          height: 17,
+          background: '#2b2b33',
+          borderRadius: '50%',
+          border: '4px solid #f1a0faa7',
+          top: 20,
+          right: 15,
+          zIndex: 10,
+        }}
+      />
+      <Handle
+        type="source"
+        id="image"
+        position={Position.Right}
+        style={{
+          width: 17,
+          height: 17,
+          background: '#2b2b33',
+          borderRadius: '50%',
+          border: '4px solid #f1a0faa7',
+          top: 20,
+          left: 0,
+          zIndex: 10,
+        }}
       />
     </div>
   );
