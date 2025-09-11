@@ -2,11 +2,28 @@
 
 import { Handle, Position, NodeProps, Node } from '@xyflow/react';
 import { useState } from 'react';
-import { FiDownload, FiCopy, FiTrash2, FiChevronDown } from 'react-icons/fi';
+import { FiChevronDown } from 'react-icons/fi';
 import { IoMdArrowUp } from 'react-icons/io';
-export type ChatNodeData = { customId: string };
 
-export default function ChatNode({ id }: NodeProps<Node<ChatNodeData>>) {
+export type ChatNodeData = { customId: string };
+export const CHAT_NODE_WIDTH = 520;
+export const CHAT_NODE_HANDLE_TOP = 20;
+export const CHAT_NODE_HANDLE_IDS = {
+  left: 'left',
+  right: 'right',
+} as const;
+
+const baseHandleStyle = {
+  width: 17,
+  height: 17,
+  background: '#2b2b33',
+  borderRadius: '50%',
+  border: '4px solid #f1a0faa7',
+  top: CHAT_NODE_HANDLE_TOP,
+  zIndex: 10,
+} as const;
+
+export default function ChatNode({}: NodeProps<Node<ChatNodeData>>) {
   const [input, setInput] = useState('');
   const [response, setResponse] = useState<string | null>(null);
 
@@ -67,32 +84,20 @@ export default function ChatNode({ id }: NodeProps<Node<ChatNodeData>>) {
 
       <Handle
         type="source"
-        id="image"
+        id={CHAT_NODE_HANDLE_IDS.right}
         position={Position.Right}
         style={{
-          width: 17,
-          height: 17,
-          background: '#2b2b33',
-          borderRadius: '50%',
-          border: '4px solid #f1a0faa7',
-          top: 20,
+          ...baseHandleStyle,
           right: 15,
-          zIndex: 10,
         }}
       />
       <Handle
         type="source"
-        id="image"
-        position={Position.Right}
+        id={CHAT_NODE_HANDLE_IDS.left}
+        position={Position.Left}
         style={{
-          width: 17,
-          height: 17,
-          background: '#2b2b33',
-          borderRadius: '50%',
-          border: '4px solid #f1a0faa7',
-          top: 20,
+          ...baseHandleStyle,
           left: 0,
-          zIndex: 10,
         }}
       />
     </div>

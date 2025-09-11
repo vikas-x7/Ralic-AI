@@ -3,21 +3,23 @@
 import { useCallback, useState } from 'react';
 import {
   ReactFlow,
-  addEdge,
-  useNodesState,
   useEdgesState,
-  Background,
-  Controls,
   ConnectionMode,
   ReactFlowProvider,
   useReactFlow,
+  Position,
   type Node,
   type Edge,
-  type Connection,
   type NodeChange,
+  type FinalConnectionState,
   applyNodeChanges,
 } from '@xyflow/react';
-import ChatNode, { type ChatNodeData } from './ChatNode';
+import ChatNode, {
+  CHAT_NODE_HANDLE_IDS,
+  CHAT_NODE_HANDLE_TOP,
+  CHAT_NODE_WIDTH,
+  type ChatNodeData,
+} from './ChatNode';
 
 const nodeTypes = {
   chatNode: ChatNode,
@@ -44,48 +46,57 @@ function ChatCanvasInner() {
     []
   );
 
-  const onConnect = useCallback(
-    (params: Connection) => {
-      setEdges((eds) => addEdge(params, eds));
-    },
-    [setEdges]
-  );
-
   const onConnectEnd = useCallback(
-    (event: any, connectionState: any) => {
-      if (!connectionState.isValid && connectionState.fromNode) {
-        const id = crypto.randomUUID();
-        const clientX =
-          'clientX' in event
-            ? event.clientX
-            : event.changedTouches?.[0]?.clientX;
-        const clientY =
-          'clientY' in event
-            ? event.clientY
-            : event.changedTouches?.[0]?.clientY;
-
-        if (clientX === undefined || clientY === undefined) return;
-
-        const position = screenToFlowPosition({ x: clientX, y: clientY });
-
-        const newNode: Node<ChatNodeData> = {
-          id,
-          type: 'chatNode',
-          position,
-          data: { customId: id },
-        };
-
-        setNodes((nds) => nds.concat(newNode));
-        setEdges((eds) =>
-          eds.concat({
-            id: `e-${connectionState.fromNode.id}-${id}`,
-            source: connectionState.fromNode.id,
-            sourceHandle: connectionState.fromHandle?.id || null,
-            target: id,
-            type: 'floating',
-          })
-        );
+    (event: MouseEvent | TouchEvent, connectionState: FinalConnectionState) => {
+      if (
+        connectionState.isValid ||
+        !connectionState.fromNode ||
+        connectionState.toNode ||
+        connectionState.toHandle
+      ) {
+        return;
       }
+
+      const id = crypto.randomUUID();
+      const clientX =
+        'clientX' in event ? event.clientX : event.changedTouches?.[0]?.clientX;
+      const clientY =
+        'clientY' in event ? event.clientY : event.changedTouches?.[0]?.clientY;
+
+      if (clientX === undefined || clientY === undefined) return;
+
+      const dropPosition = screenToFlowPosition({ x: clientX, y: clientY });
+      const sourceNodeId = connectionState.fromNode.id;
+      const sourceHandleId = connectionState.fromHandle?.id || null;
+      const targetHandle =
+        connectionState.fromPosition === Position.Left
+          ? CHAT_NODE_HANDLE_IDS.right
+          : CHAT_NODE_HANDLE_IDS.left;
+
+      const newNode: Node<ChatNodeData> = {
+        id,
+        type: 'chatNode',
+        position: {
+          x:
+            targetHandle === CHAT_NODE_HANDLE_IDS.right
+              ? dropPosition.x - CHAT_NODE_WIDTH
+              : dropPosition.x,
+          y: dropPosition.y - CHAT_NODE_HANDLE_TOP,
+        },
+        data: { customId: id },
+      };
+
+      setNodes((nds) => nds.concat(newNode));
+      setEdges((eds) =>
+        eds.concat({
+          id: `e-${sourceNodeId}-${id}`,
+          source: sourceNodeId,
+          sourceHandle: sourceHandleId,
+          target: id,
+          targetHandle,
+          type: 'floating',
+        })
+      );
     },
     [screenToFlowPosition, setNodes, setEdges]
   );
@@ -97,11 +108,12 @@ function ChatCanvasInner() {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
         onConnectEnd={onConnectEnd}
+        isValidConnection={() => false}
         nodeTypes={nodeTypes}
         fitView
         connectionMode={ConnectionMode.Loose}
+        connectOnClick={false}
         className="bg-gray-900"
         defaultEdgeOptions={{
           type: 'floating',
