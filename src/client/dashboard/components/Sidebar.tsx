@@ -39,13 +39,9 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="flex w-60 flex-col border-r border-[#2a2a2a] bg-[#050505]">
+    <aside className="flex w-60 flex-col border-r border-[#2a2a2a] bg-[#141414]">
       <div className="px- mb-4 flex items-center border-b border-[#2a2a2a] py-1 text-white">
-        <img
-          src="https://i.pinimg.com/1200x/a0/cf/06/a0cf0615ea4915513ce4e3f64053ff8c.jpg"
-          alt=""
-          className="w-11"
-        />
+        <img src="/images/logo.png" alt="" className="w-11" />
         <h1 className="font-serif text-[18px] font-medium">Kausy AI </h1>
       </div>
       <div className="flex-1 overflow-y-auto px-2">
