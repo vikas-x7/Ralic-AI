@@ -1,17 +1,28 @@
 'use client';
 
 import { Handle, Position, NodeProps, Node } from '@xyflow/react';
-import { useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 import { IoMdArrowUp } from 'react-icons/io';
 
 export type ChatNodeData = {
   customId: string;
   onInteract?: () => void;
+  onResponseHeightChange?: (nodeId: string, delta: number) => void;
 };
 
-export const CHAT_NODE_WIDTH = 520;
+export const CHAT_NODE_WIDTH = 750;
 export const CHAT_NODE_HANDLE_TOP = 20;
+const CHAT_INPUT_LINE_HEIGHT = 32;
+const CHAT_INPUT_MAX_LINES = 7;
+const CHAT_INPUT_MAX_HEIGHT = CHAT_INPUT_LINE_HEIGHT * CHAT_INPUT_MAX_LINES;
+const CHAT_TEXT_INTERACTION_CLASS = 'nodrag nopan cursor-text select-text';
 
 export const CHAT_NODE_HANDLE_IDS = {
   left: 'left',
@@ -29,8 +40,39 @@ const baseHandleStyle = {
 } as const;
 
 export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
+  const { customId, onInteract, onResponseHeightChange } = data;
   const [input, setInput] = useState('');
   const [response, setResponse] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const responseSectionRef = useRef<HTMLDivElement>(null);
+  const previousResponseHeightRef = useRef(0);
+
+  const resizeTextarea = useCallback((textarea: HTMLTextAreaElement) => {
+    textarea.style.height = '0px';
+
+    const nextHeight = Math.min(textarea.scrollHeight, CHAT_INPUT_MAX_HEIGHT);
+
+    textarea.style.height = `${nextHeight}px`;
+    textarea.style.overflowY =
+      textarea.scrollHeight > CHAT_INPUT_MAX_HEIGHT ? 'auto' : 'hidden';
+  }, []);
+
+  useEffect(() => {
+    if (!textareaRef.current) return;
+
+    resizeTextarea(textareaRef.current);
+  }, [input, resizeTextarea]);
+
+  useLayoutEffect(() => {
+    const nextHeight =
+      responseSectionRef.current?.getBoundingClientRect().height ?? 0;
+    const delta = nextHeight - previousResponseHeightRef.current;
+
+    if (delta) {
+      previousResponseHeightRef.current = nextHeight;
+      onResponseHeightChange?.(customId, delta);
+    }
+  }, [customId, onResponseHeightChange, response]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -39,30 +81,40 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
   };
 
   return (
-    <div className="group w-[750px] rounded-[9px] border border-[#303030] bg-[#181818] shadow-xl transition-all">
+    <div className="group w-[750px] rounded-[12px] border border-[#303030] bg-[#181818] shadow-xl transition-all">
       {/* Top bar */}
       <div className="flex items-center justify-between border-b border-[#1f1f1f] p-3 py-5" />
       {response && (
-        <div className="bg-red-600 px-4">
-          <div className="rounded-l text-[20px] text-gray-200">{response}</div>
+        <div
+          ref={responseSectionRef}
+          className="border-b border-[#1f1f1f] px-4 py-4"
+        >
+          <div
+            className={`${CHAT_TEXT_INTERACTION_CLASS} rounded-[10px] bg-[#202020] px-4 py-3 text-[20px] leading-8 [overflow-wrap:anywhere] break-words whitespace-pre-wrap text-gray-200`}
+          >
+            {response}
+          </div>
         </div>
       )}
 
       {/* Input */}
       <div className="p-4">
         <textarea
+          ref={textareaRef}
+          rows={1}
           value={input}
           onChange={(e) => {
             const nextValue = e.target.value;
 
             if (!input.length && nextValue.length) {
-              data.onInteract?.();
+              onInteract?.();
             }
 
             setInput(nextValue);
+            resizeTextarea(e.currentTarget);
           }}
           placeholder="Ask a question..."
-          className="min-h-[10px] w-full resize-none bg-transparent text-sm text-[20px] text-gray-200 placeholder-white/30 outline-none"
+          className={`${CHAT_TEXT_INTERACTION_CLASS} w-full resize-none overflow-y-hidden bg-transparent p-0 text-sm text-[20px] leading-8 text-gray-200 placeholder-white/30 outline-none`}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -73,7 +125,16 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
 
         <div className="mt-4 flex items-center justify-between text-white/70">
           <div className="flex cursor-pointer items-center gap-1 rounded-[3px] border border-[#303030] px-3 py-0.5 text-[17px] hover:text-white">
-            <span>Minimax kimi k2.5</span>
+            <span
+              className={`${CHAT_TEXT_INTERACTION_CLASS} flex items-center gap-2`}
+            >
+              <img
+                src="https://thesvg.org/icons/gemini/default.svg"
+                alt=""
+                className="w-5"
+              />{' '}
+              Gemini flash 2.5
+            </span>
             <FiChevronDown />
           </div>
 
@@ -86,9 +147,6 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
         </div>
       </div>
 
-      {/* Response */}
-
-      {/* 🔥 Handles (hidden → visible on hover) */}
       <Handle
         type="source"
         id={CHAT_NODE_HANDLE_IDS.right}

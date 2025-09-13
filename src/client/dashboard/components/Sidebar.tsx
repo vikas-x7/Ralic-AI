@@ -42,7 +42,7 @@ export default function Sidebar() {
     <aside className="flex w-60 flex-col border-r border-[#2a2a2a] bg-[#141414]">
       <div className="px- mb-4 flex items-center border-b border-[#2a2a2a] py-1 text-white">
         <img src="/images/logo.png" alt="" className="w-11" />
-        <h1 className="font-serif text-[18px] font-medium">Kausy AI </h1>
+        <h1 className="text-[18px] font-medium -tracking-[1px]">Kausy ai </h1>
       </div>
       <div className="flex-1 overflow-y-auto px-2">
         <button className="flex w-full items-center gap-2 rounded-[3px] px-3 py-2 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e]">
