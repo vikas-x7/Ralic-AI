@@ -31,6 +31,7 @@ import ChatNode, {
   CHAT_NODE_WIDTH,
   type ChatNodeData,
 } from './ChatNode';
+import FullscreenChat, { type ChatMessage } from './FullscreenChat';
 
 const nodeTypes = {
   chatNode: ChatNode,
@@ -47,6 +48,11 @@ const initialNodes: Node<ChatNodeData>[] = [
 
 function ChatCanvasInner() {
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null);
+  const [nodeMessages, setNodeMessages] = useState<
+    Record<string, ChatMessage[]>
+  >({});
+
   const setNodesRef = useRef<Dispatch<
     SetStateAction<Node<ChatNodeData>[]>
   > | null>(null);
@@ -77,21 +83,51 @@ function ChatCanvasInner() {
     []
   );
 
+  const handleSend = useCallback((nodeId: string, message: string) => {
+    setNodeMessages((prev) => {
+      const current = prev[nodeId] || [];
+      return {
+        ...prev,
+        [nodeId]: [
+          ...current,
+          { role: 'user' as const, content: message },
+          { role: 'assistant' as const, content: `Echo: ${message}` },
+        ],
+      };
+    });
+  }, []);
+
+  const handleExpand = useCallback((nodeId: string) => {
+    setExpandedNodeId(nodeId);
+  }, []);
+
+  const handleCloseFullscreen = useCallback(() => {
+    setExpandedNodeId(null);
+  }, []);
+
   const syncNodeInteractionHandler = useCallback(
-    (nextNodes: Node<ChatNodeData>[]) =>
+    (nextNodes: Node<ChatNodeData>[], msgs: Record<string, ChatMessage[]>) =>
       nextNodes.map((node) => ({
         ...node,
         data: {
           ...node.data,
+          messages: msgs[node.data.customId] || [],
           onInteract: handleUserInteraction,
           onResponseHeightChange: handleResponseHeightChange,
+          onSend: handleSend,
+          onExpand: handleExpand,
         },
       })),
-    [handleUserInteraction, handleResponseHeightChange]
+    [
+      handleUserInteraction,
+      handleResponseHeightChange,
+      handleSend,
+      handleExpand,
+    ]
   );
 
   const [nodes, setNodes] = useState<Node<ChatNodeData>[]>(() =>
-    syncNodeInteractionHandler(initialNodes)
+    syncNodeInteractionHandler(initialNodes, {})
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
@@ -99,15 +135,21 @@ function ChatCanvasInner() {
     setNodesRef.current = setNodes;
   }, [setNodes]);
 
+  // Sync messages into nodes whenever nodeMessages changes
+  useEffect(() => {
+    setNodes((nds) => syncNodeInteractionHandler(nds, nodeMessages));
+  }, [nodeMessages, syncNodeInteractionHandler]);
+
   const onNodesChange = useCallback(
     (changes: NodeChange<Node<ChatNodeData>>[]) => {
       setNodes((nds) =>
         syncNodeInteractionHandler(
-          applyNodeChanges(changes, nds) as Node<ChatNodeData>[]
+          applyNodeChanges(changes, nds) as Node<ChatNodeData>[],
+          nodeMessages
         )
       );
     },
-    [syncNodeInteractionHandler]
+    [syncNodeInteractionHandler, nodeMessages]
   );
 
   const onConnectEnd = useCallback(
@@ -152,8 +194,11 @@ function ChatCanvasInner() {
         },
         data: {
           customId: id,
+          messages: [],
           onInteract: handleUserInteraction,
           onResponseHeightChange: handleResponseHeightChange,
+          onSend: handleSend,
+          onExpand: handleExpand,
         },
       };
       const sourceNodePosition =
@@ -194,6 +239,8 @@ function ChatCanvasInner() {
       getZoom,
       handleUserInteraction,
       handleResponseHeightChange,
+      handleSend,
+      handleExpand,
       screenToFlowPosition,
       setCenter,
       setNodes,
@@ -202,7 +249,7 @@ function ChatCanvasInner() {
   );
 
   return (
-    <div className="h-screen w-full bg-[#141414]">
+    <div className="relative h-screen w-full bg-[#141414]">
       <div
         aria-hidden={hasInteracted}
         className={`pointer-events-none absolute top-75 right-138 z-20 flex w-100 items-center text-white/70 transition-all duration-500 ease-out ${
@@ -243,6 +290,8 @@ function ChatCanvasInner() {
         autoPanSpeed={20}
         defaultEdgeOptions={{ type: 'floating', animated: true }}
         defaultViewport={{ x: 0, y: 0, zoom: 0.7 }}
+        minZoom={0.01}
+        maxZoom={100}
         fitViewOptions={{ maxZoom: 1 }}
       >
         <Background
@@ -252,6 +301,16 @@ function ChatCanvasInner() {
           color="#2a2a2a"
         />
       </ReactFlow>
+
+      {/* Fullscreen chat overlay */}
+      {expandedNodeId && (
+        <FullscreenChat
+          nodeId={expandedNodeId}
+          messages={nodeMessages[expandedNodeId] || []}
+          onSend={handleSend}
+          onClose={handleCloseFullscreen}
+        />
+      )}
     </div>
   );
 }

@@ -8,13 +8,18 @@ import {
   useRef,
   useState,
 } from 'react';
-import { FiChevronDown } from 'react-icons/fi';
+import { FiChevronDown, FiPlus, FiMic } from 'react-icons/fi';
 import { IoMdArrowUp } from 'react-icons/io';
+import { BsArrowsFullscreen } from 'react-icons/bs';
+import type { ChatMessage } from './FullscreenChat';
 
 export type ChatNodeData = {
   customId: string;
+  messages?: ChatMessage[];
   onInteract?: () => void;
   onResponseHeightChange?: (nodeId: string, delta: number) => void;
+  onSend?: (nodeId: string, message: string) => void;
+  onExpand?: (nodeId: string) => void;
 };
 
 export const CHAT_NODE_WIDTH = 750;
@@ -40,9 +45,15 @@ const baseHandleStyle = {
 } as const;
 
 export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
-  const { customId, onInteract, onResponseHeightChange } = data;
+  const {
+    customId,
+    messages = [],
+    onInteract,
+    onResponseHeightChange,
+    onSend,
+    onExpand,
+  } = data;
   const [input, setInput] = useState('');
-  const [response, setResponse] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const responseSectionRef = useRef<HTMLDivElement>(null);
   const previousResponseHeightRef = useRef(0);
@@ -72,78 +83,111 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
       previousResponseHeightRef.current = nextHeight;
       onResponseHeightChange?.(customId, delta);
     }
-  }, [customId, onResponseHeightChange, response]);
+  }, [customId, onResponseHeightChange, messages]);
 
   const handleSend = () => {
     if (!input.trim()) return;
-    setResponse(`Echo: ${input}`);
+    if (onSend) {
+      onSend(customId, input.trim());
+    }
     setInput('');
   };
 
   return (
-    <div className="group w-[750px] rounded-[12px] border border-[#303030] bg-[#181818] shadow-xl transition-all">
+    <div className="group w-[750px] rounded-[1px] border border-[#303030] bg-[#181818] shadow-xl transition-all">
       {/* Top bar */}
-      <div className="flex items-center justify-between border-b border-[#1f1f1f] p-3 py-5" />
-      {response && (
+      <div className="flex items-center justify-between border-b border-[#1f1f1f] p-3 py-4" />
+
+      {messages.length > 0 && (
         <div
           ref={responseSectionRef}
-          className="border-b border-[#1f1f1f] px-4 py-4"
+          className="space-y-3 border-b border-[#1f1f1f] px-4 py-3"
         >
-          <div
-            className={`${CHAT_TEXT_INTERACTION_CLASS} rounded-[10px] bg-[#202020] px-4 py-3 text-[20px] leading-8 [overflow-wrap:anywhere] break-words whitespace-pre-wrap text-gray-200`}
-          >
-            {response}
-          </div>
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`${CHAT_TEXT_INTERACTION_CLASS} rounded-[1px] px-4 py-3 text-[18px] leading-7 wrap-anywhere whitespace-pre-wrap text-gray-200 ${
+                msg.role === 'user' ? 'ml-8 bg-[#2b2b33]' : 'mr-8 bg-[#202020]'
+              }`}
+            >
+              {msg.role === 'assistant' && (
+                <span className="mb-1 block text-[11px] font-medium text-white/30">
+                  Kausy ai
+                </span>
+              )}
+              {msg.content}
+            </div>
+          ))}
         </div>
       )}
 
       {/* Input */}
       <div className="p-4">
-        <textarea
-          ref={textareaRef}
-          rows={1}
-          value={input}
-          onChange={(e) => {
-            const nextValue = e.target.value;
+        <div className="rounded-[2px] border border-[#303030] bg-[#212121] px-4 py-3 shadow-lg">
+          <textarea
+            ref={textareaRef}
+            rows={1}
+            value={input}
+            onChange={(e) => {
+              const nextValue = e.target.value;
 
-            if (!input.length && nextValue.length) {
-              onInteract?.();
-            }
+              if (!input.length && nextValue.length) {
+                onInteract?.();
+              }
 
-            setInput(nextValue);
-            resizeTextarea(e.currentTarget);
-          }}
-          placeholder="Ask a question..."
-          className={`${CHAT_TEXT_INTERACTION_CLASS} w-full resize-none overflow-y-hidden bg-transparent p-0 text-sm text-[20px] leading-8 text-gray-200 placeholder-white/30 outline-none`}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-        />
+              setInput(nextValue);
+              resizeTextarea(e.currentTarget);
+            }}
+            placeholder="Ask a follow-up"
+            className={`${CHAT_TEXT_INTERACTION_CLASS} w-full resize-none overflow-y-hidden bg-transparent py-1 text-[16px] leading-6 text-gray-200 placeholder-white/40 outline-none`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+          />
 
-        <div className="mt-4 flex items-center justify-between text-white/70">
-          <div className="flex cursor-pointer items-center gap-1 rounded-[3px] border border-[#303030] px-3 py-0.5 text-[17px] hover:text-white">
-            <span
-              className={`${CHAT_TEXT_INTERACTION_CLASS} flex items-center gap-2`}
-            >
-              <img
-                src="https://thesvg.org/icons/gemini/default.svg"
-                alt=""
-                className="w-5"
-              />{' '}
-              Gemini flash 2.5
-            </span>
-            <FiChevronDown />
+          <div className="mt-3 flex items-center justify-between text-white/70">
+            <div className="flex items-center gap-2">
+              <button
+                className={`${CHAT_TEXT_INTERACTION_CLASS} flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-[#303030] hover:text-white`}
+              >
+                <FiPlus size={20} />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div
+                className={`${CHAT_TEXT_INTERACTION_CLASS} flex cursor-pointer items-center gap-1 rounded-full px-3 py-1.5 text-[14px] transition-colors hover:bg-[#303030] hover:text-white`}
+              >
+                <span>Model</span>
+                <FiChevronDown size={14} />
+              </div>
+
+              <button
+                className={`${CHAT_TEXT_INTERACTION_CLASS} flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-[#303030] hover:text-white`}
+              >
+                <FiMic size={18} />
+              </button>
+
+              <button
+                onClick={() => onExpand?.(customId)}
+                className="nodrag nopan flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors hover:bg-[#303030] hover:text-white"
+                title="Open fullscreen chat"
+              >
+                <BsArrowsFullscreen size={14} />
+              </button>
+
+              <button
+                onClick={handleSend}
+                disabled={!input.trim()}
+                className={`${CHAT_TEXT_INTERACTION_CLASS} ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white transition-all hover:bg-white/30 disabled:opacity-30 disabled:hover:bg-white/20`}
+              >
+                <IoMdArrowUp size={18} />
+              </button>
+            </div>
           </div>
-
-          <button
-            onClick={handleSend}
-            className="flex cursor-pointer items-center gap-1 rounded-[3px] border border-[#303030] p-2 text-white/60 hover:text-white"
-          >
-            <IoMdArrowUp size={20} />
-          </button>
         </div>
       </div>
 
