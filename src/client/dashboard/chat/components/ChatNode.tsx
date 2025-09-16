@@ -94,7 +94,7 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
   };
 
   return (
-    <div className="group w-[750px] rounded-[1px] border border-[#303030] bg-[#181818] shadow-xl transition-all">
+    <div className="group w-[750px] rounded-[8px] border border-[#303030] bg-[#181818] shadow-xl transition-all">
       {/* Top bar */}
       <div className="flex items-center justify-between border-b border-[#1f1f1f] p-3 py-4" />
 
@@ -107,7 +107,7 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
             <div
               key={i}
               className={`${CHAT_TEXT_INTERACTION_CLASS} rounded-[1px] px-4 py-3 text-[18px] leading-7 wrap-anywhere whitespace-pre-wrap text-gray-200 ${
-                msg.role === 'user' ? 'ml-8 bg-[#2b2b33]' : 'mr-8 bg-[#202020]'
+                msg.role === 'user' ? 'ml-8 bg-[#202020]' : 'mr-8 bg-[#202020]'
               }`}
             >
               {msg.role === 'assistant' && (
@@ -122,8 +122,8 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
       )}
 
       {/* Input */}
-      <div className="p-4">
-        <div className="rounded-[2px] border border-[#303030] bg-[#212121] px-4 py-3 shadow-lg">
+      <div className="">
+        <div className="border-t border-[#303030] bg-[#212121] px-4 py-3 shadow-lg">
           <textarea
             ref={textareaRef}
             rows={1}
