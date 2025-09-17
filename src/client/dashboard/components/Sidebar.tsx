@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { FiLogOut } from 'react-icons/fi';
+import { useState } from 'react';
+import { FiLogOut, FiSidebar } from 'react-icons/fi';
 import { IoIosCreate } from 'react-icons/io';
 import { IoCreateOutline } from 'react-icons/io5';
 
@@ -28,6 +29,7 @@ const dummyChats: Chat[] = [
 
 export default function Sidebar() {
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(true);
 
   const handleNewChat = () => {
     const chatId = crypto.randomUUID();
@@ -39,47 +41,83 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="flex w-60 flex-col border-r border-[#2a2a2a] bg-[#141414]">
-      <div className="px- mb-4 flex items-center border-b border-[#2a2a2a] py-1 text-white">
-        <img src="/images/logo.png" alt="" className="w-11" />
-        <h1 className="text-[18px] font-medium -tracking-[1px]">Kausy ai </h1>
-      </div>
-      <div className="flex-1 overflow-y-auto px-2">
-        <button className="flex w-full items-center gap-2 rounded-[3px] px-3 py-2 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e]">
-          <IoCreateOutline size={18} className="mb-1" />
-          New chat
-        </button>
-        <div className="space-y-1">
-          <p className="mt-3 mb-2 px-3 text-[15px] text-white">chats</p>
-          {dummyChats.map((chat) => (
+    <>
+      <aside
+        className={`relative flex flex-col border-[#2a2a2a] bg-[#141414] transition-all duration-300 ease-in-out ${
+          isOpen ? 'w-[260px] border-r' : 'w-0 overflow-hidden border-r-0'
+        }`}
+      >
+        <div className="flex h-full w-[260px] flex-col">
+          <div className="flex items-center justify-between border-b border-[#2a2a2a] pr-3 pb-1">
+            <div className="flex items-center text-white">
+              <img src="/images/logo.png" alt="" className="w-12" />
+              <h1 className="-ml-1 text-[17px] font-medium tracking-tight">
+                Kausy ai
+              </h1>
+            </div>
             <button
-              key={chat.id}
-              onClick={() => handleChatClick(chat.id)}
-              className="flex w-full items-center rounded-[3px] px-3 py-2 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e]"
+              onClick={() => setIsOpen(false)}
+              className="rounded-md p-1.5 text-white/40 transition-colors hover:bg-white/10 hover:text-white"
+              title="Close Sidebar"
             >
-              <span className="truncate">{chat.title}</span>
+              <FiSidebar size={18} />
             </button>
-          ))}
-        </div>
-      </div>
-      <div className="flex items-center justify-between border-t border-[#2a2a2a] px-3 py-2">
-        {/* Left */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center text-sm font-semibold text-white">
-            VP
           </div>
+          <div className="flex-1 overflow-y-auto px-3 py-4">
+            <button className="flex w-full items-center gap-2 rounded-[3px] bg-white/5 px-3 py-2.5 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e]">
+              <IoCreateOutline size={18} className="mb-0.5 opacity-80" />
+              New chat
+            </button>
+            <div className="mt-4 space-y-1">
+              <p className="mb-2 px-3 text-[13px] font-medium text-white/60">
+                chats
+              </p>
+              {dummyChats.map((chat, i) => (
+                <button
+                  key={`${chat.id}-${i}`}
+                  onClick={() => handleChatClick(chat.id)}
+                  className="flex w-full items-center rounded-[3px] px-3 py-2 text-left text-sm text-gray-300 transition-colors hover:bg-[#1e1e1e] hover:text-white"
+                >
+                  <span className="truncate">{chat.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center justify-between border-t border-[#2a2a2a] px-4 py-3">
+            {/* Left */}
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-white/10 text-sm font-semibold text-white">
+                VP
+              </div>
 
-          <div className="flex flex-col">
-            <span className="text-[13px] text-white">vikas pal</span>
-            <span className="text-[11px] text-gray-400">
-              vikaspal968562@gmail.com
-            </span>
+              <div className="flex flex-col">
+                <span className="text-[13px] font-medium text-white">
+                  vikas pal
+                </span>
+                <span className="text-[11px] text-white/40">
+                  vikaspal968562@gmail.com
+                </span>
+              </div>
+            </div>
+
+            {/* Right Icon */}
+            <FiLogOut
+              className="cursor-pointer text-white/40 hover:text-white"
+              size={18}
+            />
           </div>
         </div>
+      </aside>
 
-        {/* Right Icon */}
-        <FiLogOut className="cursor-pointer text-gray-400 hover:text-white" />
-      </div>
-    </aside>
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="absolute top-6 left-6 z-[100] rounded-md border border-[#303030] bg-[#1a1a1a] p-2 text-white/50 shadow-md transition-colors hover:text-white"
+          title="Open Sidebar"
+        >
+          <FiSidebar size={20} />
+        </button>
+      )}
+    </>
   );
 }
