@@ -23,6 +23,7 @@ import {
   applyNodeChanges,
   Background,
   BackgroundVariant,
+  MiniMap,
 } from '@xyflow/react';
 
 import ChatNode, {
@@ -299,6 +300,19 @@ function ChatCanvasInner() {
           gap={14}
           size={1.5}
           color="#2a2a2a"
+        />
+        <MiniMap
+          nodeColor="#2b2b33"
+          nodeStrokeColor="#303030"
+          nodeBorderRadius={2}
+          maskColor="rgba(20, 20, 20, 0.7)"
+          style={{
+            backgroundColor: '#141414',
+            border: '1px solid #2a2a2a',
+            borderRadius: '6px',
+            width: 160,
+            height: 110,
+          }}
         />
       </ReactFlow>
 
