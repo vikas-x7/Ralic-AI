@@ -43,7 +43,7 @@ export default function Sidebar() {
   return (
     <>
       <aside
-        className={`relative flex flex-col border-[#2a2a2a] bg-[#141414] transition-all duration-300 ease-in-out ${
+        className={`relative flex flex-col border-white/10 bg-black transition-all duration-300 ease-in-out ${
           isOpen ? 'w-[260px] border-r' : 'w-0 overflow-hidden border-r-0'
         }`}
       >
@@ -52,7 +52,7 @@ export default function Sidebar() {
             <div className="flex items-center text-white">
               <img src="/images/logo.png" alt="" className="w-12" />
               <h1 className="-ml-1 text-[17px] font-medium tracking-tight">
-                Kausy ai
+                Ralic ai
               </h1>
             </div>
             <button
