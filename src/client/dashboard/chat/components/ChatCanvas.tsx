@@ -23,7 +23,6 @@ import {
   applyNodeChanges,
   Background,
   BackgroundVariant,
-  MiniMap,
 } from '@xyflow/react';
 
 import ChatNode, {
@@ -250,7 +249,7 @@ function ChatCanvasInner() {
   );
 
   return (
-    <div className="relative h-screen w-full bg-[#141414]">
+    <div className="relative h-screen w-full bg-black">
       <div
         aria-hidden={hasInteracted}
         className={`pointer-events-none absolute top-75 right-138 z-20 flex w-100 items-center text-white/70 transition-all duration-500 ease-out ${
@@ -266,15 +265,15 @@ function ChatCanvasInner() {
               alt=""
               width={80}
               height={80}
-              className="w-17 opacity-80"
+              className="w-20 opacity-80"
             />
             <div>
-              <h1 className="-ml-[16px] text-[32px] font-semibold -tracking-[2px]">
-                Kausy ai
+              <h1 className="-ml-[16px] text-[42px] font-semibold -tracking-[2px]">
+                Ralic ai
               </h1>
             </div>
           </div>
-          <p className="-mt-4 px-5">Welcome back Vikas pal to kausy ai</p>
+          <p className="-mt-4 px-5">Welcome back Vikas pal to ralic ai</p>
         </div>
       </div>
       <ReactFlow
@@ -295,25 +294,12 @@ function ChatCanvasInner() {
         maxZoom={100}
         fitViewOptions={{ maxZoom: 1 }}
       >
-        <Background
+        {/* <Background
           variant={BackgroundVariant.Dots}
           gap={14}
           size={1.5}
           color="#2a2a2a"
-        />
-        <MiniMap
-          nodeColor="#2b2b33"
-          nodeStrokeColor="#303030"
-          nodeBorderRadius={2}
-          maskColor="rgba(20, 20, 20, 0.7)"
-          style={{
-            backgroundColor: '#141414',
-            border: '1px solid #2a2a2a',
-            borderRadius: '6px',
-            width: 160,
-            height: 110,
-          }}
-        />
+        /> */}
       </ReactFlow>
 
       {/* Fullscreen chat overlay */}
