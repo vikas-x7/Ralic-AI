@@ -92,7 +92,7 @@ export default function FullscreenChat({
                       className="w-5 opacity-60"
                     />
                     <span className="text-[12px] font-medium text-white/40">
-                      Kausy ai
+                      Ralic ai
                     </span>
                   </div>
                   <div className="rounded-2xl rounded-tl-sm bg-[#1e1e1e] px-4 py-3 text-[15px] leading-7 wrap-anywhere whitespace-pre-wrap text-gray-300">
