@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { DM_Sans } from 'next/font/google';
 import '@xyflow/react/dist/style.css';
 import './globals.css';
+import { TRPCProvider } from '@/client/components/providers/TRPCProvider';
+import { SessionProvider } from 'next-auth/react';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -21,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className={`${dmSans.className} flex min-h-full flex-col`}>
-        {children}
+        <SessionProvider>
+          <TRPCProvider>{children}</TRPCProvider>
+        </SessionProvider>
       </body>
     </html>
   );
