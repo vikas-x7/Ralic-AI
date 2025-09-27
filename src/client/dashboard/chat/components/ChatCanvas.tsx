@@ -135,7 +135,6 @@ function ChatCanvasInner() {
     setNodesRef.current = setNodes;
   }, [setNodes]);
 
-  // Sync messages into nodes whenever nodeMessages changes
   useEffect(() => {
     setNodes((nds) => syncNodeInteractionHandler(nds, nodeMessages));
   }, [nodeMessages, syncNodeInteractionHandler]);
@@ -293,16 +292,8 @@ function ChatCanvasInner() {
         minZoom={0.01}
         maxZoom={100}
         fitViewOptions={{ maxZoom: 1 }}
-      >
-        {/* <Background
-          variant={BackgroundVariant.Dots}
-          gap={14}
-          size={1.5}
-          color="#2a2a2a"
-        /> */}
-      </ReactFlow>
+      ></ReactFlow>
 
-      {/* Fullscreen chat overlay */}
       {expandedNodeId && (
         <FullscreenChat
           nodeId={expandedNodeId}

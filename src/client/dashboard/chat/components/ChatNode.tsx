@@ -94,8 +94,7 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
   };
 
   return (
-    <div className="group w-[750px] rounded-[8px] border border-[#303030] bg-black/90 shadow-xl transition-all">
-      {/* Top bar */}
+    <div className="group w-[750px] rounded-[8px] border border-[#303030] bg-[#121212] shadow-xl transition-all">
       <div className="flex items-center justify-between border-b border-[#1f1f1f] p-3 py-4" />
 
       {messages.length > 0 && (
@@ -121,9 +120,8 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
         </div>
       )}
 
-      {/* Input */}
       <div className="">
-        <div className="bg-black px-4 py-3 shadow-lg">
+        <div className="bg-[#121212] px-4 py-3 shadow-lg">
           <textarea
             ref={textareaRef}
             rows={1}
