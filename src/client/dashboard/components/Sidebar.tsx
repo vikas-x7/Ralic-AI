@@ -84,7 +84,6 @@ export default function Sidebar() {
             </div>
           </div>
           <div className="flex items-center justify-between border-t border-[#2a2a2a] px-4 py-3">
-            {/* Left */}
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-white/10 text-sm font-semibold text-white">
                 VP
@@ -100,7 +99,6 @@ export default function Sidebar() {
               </div>
             </div>
 
-            {/* Right Icon */}
             <FiLogOut
               className="cursor-pointer text-white/40 hover:text-white"
               size={18}

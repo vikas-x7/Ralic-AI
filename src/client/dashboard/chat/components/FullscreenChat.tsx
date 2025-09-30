@@ -54,8 +54,7 @@ export default function FullscreenChat({
   };
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col bg-[#141414]">
-      {/* Messages area */}
+    <div className="absolute inset-0 z-50 flex flex-col bg-black">
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-[768px] px-4 py-6 pb-36">
           {messages.length === 0 && (
@@ -106,9 +105,8 @@ export default function FullscreenChat({
         </div>
       </div>
 
-      {/* Input area - floating */}
       <div className="absolute bottom-6 left-1/2 w-full max-w-[768px] -translate-x-1/2 px-4">
-        <div className="rounded-[9px] border border-[#303030] bg-[#212121] px-4 py-3 shadow-lg">
+        <div className="rounded-[9px] bg-[#121212] px-4 py-3 shadow-lg">
           <textarea
             ref={textareaRef}
             rows={1}
