@@ -1,0 +1,82 @@
+'use client';
+
+import { useState } from 'react';
+
+const faqs = [
+  {
+    question: 'What is Ralic AI?',
+    answer:
+      'Ralic AI is a powerful, node-based workspace built specifically for developers and architects. It allows you to run parallel AI conversations and instantly generate complex architecture diagrams using natural language or code, replacing clunky manual drawing tools.',
+  },
+  {
+    question: 'Which diagram types and syntaxes are supported?',
+    answer:
+      'We support over 20 diagram types including Flowcharts, Sequence Diagrams, ER Diagrams, Git Graphs, and Mindmaps. It is natively integrated with Mermaid and ReactFlow, supporting direct generation through AI chat nodes.',
+  },
+  {
+    question: 'How does the real-time preview work?',
+    answer:
+      'As you chat with the AI or type your diagram code, Ralic AI renders the visual architecture instantly on its infinite canvas, so you can see exactly how your system maps out without switching contexts.',
+  },
+  {
+    question: 'Can I export or share my diagrams and workspace?',
+    answer:
+      'Yes! Every diagram you create can be exported in high-resolution PNG or SVG formats. You can also generate sharing links to easily collaborate with your team on your entire chat and diagram canvas.',
+  },
+  {
+    question: 'Do I need to manually arrange my nodes?',
+    answer:
+      'Not typically. By leveraging our AI-assisted layout and declarative code syntaxes like Mermaid, Ralic AI automatically handles the layout and routing of your diagrams so you can focus on system design rather than pixel-pushing.',
+  },
+];
+
+export default function FAQ() {
+  const [activeIndex, setActiveIndex] = useState<number | null>(0);
+
+  return (
+    <section className="w-full bg-black px-17 py-20 text-white lg:py-28">
+      <div className="grid gap-16 px-6 lg:grid-cols-2 lg:px-8">
+        <div>
+          <h2 className="text-4xl leading-tight font-medium tracking-tight md:text-5xl">
+            Frequently Asked <br /> Questions
+          </h2>
+        </div>
+
+        <div className="border-t border-white/10">
+          {faqs.map((f, i) => (
+            <div key={i} className="border-b border-white/10">
+              <button
+                onClick={() => setActiveIndex(activeIndex === i ? null : i)}
+                className="flex w-full items-center justify-between py-6 text-left"
+              >
+                <span className="text-[16px] sm:text-[15px]">{f.question}</span>
+
+                <span
+                  className={`text-xl transition-transform duration-300 ${
+                    activeIndex === i ? 'rotate-45' : ''
+                  }`}
+                >
+                  +
+                </span>
+              </button>
+
+              <div
+                className={`grid transition-all duration-300 ${
+                  activeIndex === i
+                    ? 'grid-rows-[1fr] pb-6 opacity-100'
+                    : 'grid-rows-[0fr] opacity-0'
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <p className="pr-4 text-sm leading-relaxed text-white/60 md:text-base">
+                    {f.answer}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -5,53 +5,55 @@ export default function EventsSection() {
     <div className="mx-auto mt-32 w-full px-24 pb-32">
       <div className="mb-12 max-w-2xl">
         <h2 className="mb-4 text-[42px] font-medium -tracking-[1px] text-white">
-          Events
+          Core Capabilities
         </h2>
         <p className="mb-6 text-[15px] leading-relaxed -tracking-[0.2px] text-white/60">
-          University events take place throughout the year, from educational
-          showpieces to public lectures, national tours and one-off exhibitions.
+          Discover how Ralic AI&apos;s node-based canvas breaks you out of the
+          linear chat box. Transition seamlessly from AI conversations to
+          real-time architecture diagrams, enabling true limitless exploration.
         </p>
         <a
           href="#"
           className="inline-block border-b border-white/30 pb-0.5 text-[14px] text-white/80 transition-colors hover:border-white hover:text-white"
         >
-          See all events
+          Explore use cases
         </a>
       </div>
 
-      <div className="grid grid-cols-1 gap-[1px] border border-white/10 bg-white/10 shadow-2xl md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-px border border-white/10 bg-white/10 shadow-2xl md:grid-cols-2 lg:grid-cols-4">
         {[
           {
             title:
-              'Student work on display at Khazar University Art Gallery Exhibition',
-            dateNum: '5',
-            dateStr: 'Dec\nem\nber',
+              'Parallel AI Discussions: Run multiple models and conversations side-by-side',
+            dateNum: '01',
+            dateStr: 'KEY\nFEA\nTURE',
             image:
-              'https://i.pinimg.com/736x/82/39/c2/8239c260b887084b9e8719afd0811690.jpg',
+              'https://i.pinimg.com/originals/6d/2d/95/6d2d95b9f7ad754828a7cee44fa7e3bc.gif',
             hasRegister: true,
           },
           {
             title:
-              'Musical performances by students along with many guest performers',
-            dateNum: '7',
-            dateStr: 'Dec\nem\nber',
+              'Visual Thought Mapping: Organize complex ideas seamlessly on an infinite canvas',
+            dateNum: '02',
+            dateStr: 'KEY\nFEA\nTURE',
             image:
               'https://i.pinimg.com/736x/af/74/35/af743561dae6fc4f808beb8d0cb1d6aa.jpg',
             hasRegister: false,
           },
           {
             title:
-              '"History and Evolution of Typography" lecture with Rizvan Baghirli',
-            dateNum: '15',
-            dateStr: 'Dec\nem\nber',
+              'Branching Contexts: Span out your thoughts dynamically from any point in the chat',
+            dateNum: '03',
+            dateStr: 'KEY\nFEA\nTURE',
             image:
               'https://i.pinimg.com/736x/82/39/c2/8239c260b887084b9e8719afd0811690.jpg',
             hasRegister: true,
           },
           {
-            title: 'Inter-Uni Football Tournament: Khazar vs ADU',
-            dateNum: '28',
-            dateStr: 'Dec\nem\nber',
+            title:
+              'Seamless Architecture: Convert conversational insights directly into system diagrams',
+            dateNum: '04',
+            dateStr: 'KEY\nFEA\nTURE',
             image:
               'https://i.pinimg.com/1200x/7c/2c/9c/7c2c9cfc538f253e9562f6dac1399ba2.jpg',
             hasRegister: true,
@@ -84,7 +86,7 @@ export default function EventsSection() {
               <img
                 src={item.image}
                 alt={item.title}
-                className="w-full object-cover brightness-[0.7] contrast-125 filter"
+                className="w-full object-cover brightness-[0.7] contrast-125 grayscale filter"
               />
             </div>
           </div>
