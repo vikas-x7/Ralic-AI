@@ -1,9 +1,8 @@
-
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
 }
+
 datasource db {
   provider = "postgresql"
 }
@@ -19,6 +18,35 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  chats    Chat[]
+}
+
+model Chat {
+  id        String   @id @default(cuid())
+  title     String   @default("New Chat")
+  userId    String
+  canvas    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  chatId    String
+  nodeId    String   @default("root")
+  role      String
+  content   String   @db.Text
+  order     Int
+  createdAt DateTime @default(now())
+
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, nodeId, order])
 }
 
 model Account {

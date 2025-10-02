@@ -68,15 +68,15 @@ export default function LoginPage({ error }: LoginPageProps) {
         <img
           src="https://i.pinimg.com/1200x/61/6b/bc/616bbc1d07a65b544370efe359bff1e0.jpg"
           alt=""
-          className="h-screen w-full object-cover opacity-40"
+          className="h-screen w-full object-cover opacity-40 grayscale"
         />
 
         <div className="absolute bottom-[3%] left-[3%]">
           <p className="-mb-3 text-start text-[30px] font-medium -tracking-[2px]">
-            Don't Go with flow Start using
+            Don&apos;t Go with flow Start using
           </p>
           <h1 className="text-[100px] leading-25 font-semibold -tracking-[10px]">
-            Start using ralic.ai
+            Start using relic.ai
           </h1>
           <div></div>
         </div>
@@ -88,7 +88,7 @@ export default function LoginPage({ error }: LoginPageProps) {
             alt=""
             className="h-11 w-11"
           />
-          <h1 className="-ml-2 text-[20px]">Ralic.ai</h1>
+          <h1 className="-ml-2 text-[20px]">Relic.ai</h1>
         </div>
         <div className="w-full max-w-md px-6 text-center">
           <div className="mb-8 flex flex-col items-center justify-center">
