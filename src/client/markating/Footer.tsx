@@ -2,21 +2,30 @@
 
 import React from 'react';
 import Link from 'next/link';
+import MarqueeSection from './MarqueeSection';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="w-full overflow-hidden border-t border-white/10 bg-black pt-20 text-white">
-      <div className="container px-24">
+      <div className="px-3">
         <div className="flex flex-col justify-between gap-8 md:flex-row">
           <div className="relative mt-8 select-none">
             <div className="flex items-center gap-2 text-xl font-semibold">
-              <div className=""></div>
-              <h1 className="text-[48px] -tracking-[3px]">Ralic ai</h1>
+              <div className="">
+                <img
+                  src="/images/logo.png"
+                  alt=""
+                  className="w-23 bg-black object-center"
+                />
+              </div>
+              <h1 className="-ml-[24px] text-[48px] -tracking-[3px]">
+                Ralic ai
+              </h1>
             </div>
 
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
           </div>
           <div className="flex w-full flex-wrap items-center gap-x-8 gap-y-4 border-t border-white/10 py-8 md:w-auto md:justify-end md:border-t-0 md:py-8">
             <Link
@@ -29,25 +38,25 @@ const Footer = () => {
               href="#"
               className="text-sm font-medium text-white/60 transition-colors hover:text-white"
             >
-              Pricing
+              Diagram Gallery
             </Link>
             <Link
               href="#"
               className="text-sm font-medium text-white/60 transition-colors hover:text-white"
             >
-              Blog
+              AI Models
             </Link>
             <Link
               href="#"
               className="text-sm font-medium text-white/60 transition-colors hover:text-white"
             >
-              About
+              Documentation
             </Link>
             <Link
               href="#"
               className="text-sm font-medium text-white/60 transition-colors hover:text-white"
             >
-              Help center
+              Community Canvas
             </Link>
           </div>
         </div>
@@ -80,6 +89,8 @@ const Footer = () => {
           className="w-full object-contain"
         />
       </div>
+
+      <MarqueeSection />
     </footer>
   );
 };
