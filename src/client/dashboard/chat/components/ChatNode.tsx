@@ -12,14 +12,21 @@ import { FiChevronDown, FiPlus, FiMic } from 'react-icons/fi';
 import { IoMdArrowUp } from 'react-icons/io';
 import { BsArrowsFullscreen } from 'react-icons/bs';
 import type { ChatMessage } from './FullscreenChat';
+import MessageContent from './MessageContent';
 
 export type ChatNodeData = {
   customId: string;
+  initialInput?: string;
   messages?: ChatMessage[];
   onInteract?: () => void;
   onResponseHeightChange?: (nodeId: string, delta: number) => void;
   onSend?: (nodeId: string, message: string) => void;
   onExpand?: (nodeId: string) => void;
+  onTextSelection?: (
+    nodeId: string,
+    selectedText: string,
+    selectionRect: DOMRect
+  ) => void;
 };
 
 export const CHAT_NODE_WIDTH = 750;
@@ -47,13 +54,15 @@ const baseHandleStyle = {
 export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
   const {
     customId,
+    initialInput,
     messages = [],
     onInteract,
     onResponseHeightChange,
     onSend,
     onExpand,
+    onTextSelection,
   } = data;
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(() => initialInput ?? '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const responseSectionRef = useRef<HTMLDivElement>(null);
   const previousResponseHeightRef = useRef(0);
@@ -93,6 +102,19 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
     setInput('');
   };
 
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    const selectedText = selection?.toString().trim();
+
+    if (!selection || !selectedText || selection.rangeCount === 0) return;
+
+    onTextSelection?.(
+      customId,
+      selectedText,
+      selection.getRangeAt(0).getBoundingClientRect()
+    );
+  };
+
   return (
     <div className="group w-[750px] rounded-[8px] border border-[#303030] bg-[#121212] shadow-xl transition-all">
       <div className="flex items-center justify-between border-b border-[#1f1f1f] p-3 py-4" />
@@ -105,16 +127,24 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`${CHAT_TEXT_INTERACTION_CLASS} rounded-[1px] px-4 py-3 text-[18px] leading-7 wrap-anywhere whitespace-pre-wrap text-gray-200 ${
+              onMouseUp={handleTextSelection}
+              onTouchEnd={handleTextSelection}
+              className={`${CHAT_TEXT_INTERACTION_CLASS} rounded-[1px] px-4 py-3 text-[18px] leading-7 wrap-anywhere text-gray-200 ${
                 msg.role === 'user' ? 'ml-8 bg-[#202020]' : 'mr-8 bg-[#202020]'
               }`}
             >
               {msg.role === 'assistant' && (
                 <span className="mb-1 block text-[11px] font-medium text-white/30">
-                  Ralic ai
+                  Relic ai
                 </span>
               )}
-              {msg.content}
+              {msg.status === 'pending' && !msg.content ? (
+                'Thinking...'
+              ) : msg.role === 'assistant' ? (
+                <MessageContent content={msg.content} />
+              ) : (
+                msg.content
+              )}
             </div>
           ))}
         </div>
