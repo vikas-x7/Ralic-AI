@@ -23,7 +23,7 @@ const mindMapNodes = [
     name: 'AI-assisted diagram generation and refinement',
   },
   {
-    name: 'Think visually, build systematically with ralic.ai',
+    name: 'Think visually, build systematically with relic.ai',
   },
   {
     name: 'Drag, connect, and let AI do the rest',
