@@ -21,7 +21,7 @@ const Footer = () => {
                 />
               </div>
               <h1 className="-ml-[24px] text-[48px] -tracking-[3px]">
-                Ralic ai
+                Relic ai
               </h1>
             </div>
 
@@ -63,7 +63,7 @@ const Footer = () => {
 
         <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-white/10 py-10 md:flex-row">
           <p className="text-xs text-white/40">
-            © {currentYear} Ralic ai. All rights reserved.
+            © {currentYear} Relic ai. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link
