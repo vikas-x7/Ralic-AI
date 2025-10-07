@@ -3,7 +3,7 @@ export default function ComplexitySection() {
     <section id="use-case" className="bg-black px-23 py-24 text-white">
       <div className="mx-auto">
         <div className="flex flex-col items-start justify-between gap-8 border-b border-white/10 pb-10 md:flex-row">
-          <p className="max-w-md text-sm text-white/60">
+          <p className="max-w-md text-sm text-white">
             Generate and edit complex system architectures instantly through
             natural language and diagram-as-code.
           </p>
@@ -34,7 +34,7 @@ export default function ComplexitySection() {
               </span>
             </div>
 
-            <h1 className="text-5xl leading-11 -tracking-[3px] md:text-6xl">
+            <h1 className="text-5xl leading-12 font-medium -tracking-[4px] md:text-6xl">
               Built to handle <br /> complexity
             </h1>
           </div>

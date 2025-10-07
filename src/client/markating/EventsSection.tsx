@@ -8,7 +8,7 @@ export default function EventsSection() {
           Core Capabilities
         </h2>
         <p className="mb-6 text-[15px] leading-relaxed -tracking-[0.2px] text-white/60">
-          Discover how Ralic AI&apos;s node-based canvas breaks you out of the
+          Discover how Relic AI&apos;s node-based canvas breaks you out of the
           linear chat box. Transition seamlessly from AI conversations to
           real-time architecture diagrams, enabling true limitless exploration.
         </p>
@@ -26,36 +26,36 @@ export default function EventsSection() {
             title:
               'Parallel AI Discussions: Run multiple models and conversations side-by-side',
             dateNum: '01',
-            dateStr: 'KEY\nFEA\nTURE',
+            dateStr: 'KEY\nFEATURE',
             image:
-              'https://i.pinimg.com/originals/6d/2d/95/6d2d95b9f7ad754828a7cee44fa7e3bc.gif',
+              'https://i.pinimg.com/1200x/94/46/52/94465293ff661fd464e06f7b30baada8.jpg',
             hasRegister: true,
           },
           {
             title:
               'Visual Thought Mapping: Organize complex ideas seamlessly on an infinite canvas',
             dateNum: '02',
-            dateStr: 'KEY\nFEA\nTURE',
+            dateStr: 'KEY\nFEATURE',
             image:
-              'https://i.pinimg.com/736x/af/74/35/af743561dae6fc4f808beb8d0cb1d6aa.jpg',
+              'https://i.pinimg.com/736x/84/ee/a5/84eea5979c227bc5ea5ce1a044576a77.jpg',
             hasRegister: false,
           },
           {
             title:
               'Branching Contexts: Span out your thoughts dynamically from any point in the chat',
             dateNum: '03',
-            dateStr: 'KEY\nFEA\nTURE',
+            dateStr: 'KEY\nFEATURE',
             image:
-              'https://i.pinimg.com/736x/82/39/c2/8239c260b887084b9e8719afd0811690.jpg',
+              'https://i.pinimg.com/1200x/79/f9/56/79f956294b9fde1d3bbf8b73cd29f46d.jpg',
             hasRegister: true,
           },
           {
             title:
               'Seamless Architecture: Convert conversational insights directly into system diagrams',
             dateNum: '04',
-            dateStr: 'KEY\nFEA\nTURE',
+            dateStr: 'KEY\nFEATURE',
             image:
-              'https://i.pinimg.com/1200x/7c/2c/9c/7c2c9cfc538f253e9562f6dac1399ba2.jpg',
+              'https://i.pinimg.com/736x/86/7c/83/867c83b8c949f3a6e89d90fa6643df0e.jpg',
             hasRegister: true,
           },
         ].map((item, idx) => (
@@ -64,9 +64,6 @@ export default function EventsSection() {
             className="group flex flex-col bg-black transition-colors"
           >
             <div className="flex-1 p-7">
-              <h3 className="mb-10 min-h-[65px] pr-4 text-[14px] leading-relaxed font-medium text-white/80">
-                {item.title}
-              </h3>
               <div className="flex items-center gap-3">
                 <span className="text-[48px] leading-none font-light -tracking-[2px] text-white">
                   {item.dateNum}
@@ -75,20 +72,16 @@ export default function EventsSection() {
                   {item.dateStr}
                 </span>
               </div>
+              <h3 className="mt-10 min-h-[65px] pr-4 text-[14px] leading-relaxed font-medium text-white/80">
+                {item.title}
+              </h3>
             </div>
-            <div
-              className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] ${
-                idx === 0
-                  ? 'h-100 opacity-100'
-                  : 'max-h-0 opacity-0 group-hover:max-h-100 group-hover:opacity-100'
-              }`}
-            >
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-full object-cover brightness-[0.7] contrast-125 grayscale filter"
-              />
-            </div>
+
+            <img
+              src={item.image}
+              alt={item.title}
+              className="h-60 w-full object-cover brightness-[0.7] grayscale filter"
+            />
           </div>
         ))}
       </div>
