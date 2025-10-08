@@ -3,37 +3,29 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FiLogOut, FiSidebar } from 'react-icons/fi';
-import { IoIosCreate } from 'react-icons/io';
 import { IoCreateOutline } from 'react-icons/io5';
+import { trpc } from '@/client/trpc/react';
 
 interface Chat {
   id: string;
   title: string;
-  createdAt: string;
+  createdAt: Date;
 }
-
-const dummyChats: Chat[] = [
-  { id: '1', title: 'Project Planning', createdAt: '2024-01-15' },
-  { id: '2', title: 'Code Review Discussion', createdAt: '2024-01-14' },
-  { id: '3', title: 'Architecture Design', createdAt: '2024-01-13' },
-  { id: '1', title: 'Project Planning', createdAt: '2024-01-15' },
-  { id: '2', title: 'Code Review Discussion', createdAt: '2024-01-14' },
-  { id: '3', title: 'Architecture Design', createdAt: '2024-01-13' },
-  { id: '1', title: 'Project Planning', createdAt: '2024-01-15' },
-  { id: '2', title: 'Code Review Discussion', createdAt: '2024-01-14' },
-  { id: '3', title: 'Architecture Design', createdAt: '2024-01-13' },
-  { id: '1', title: 'Project Planning', createdAt: '2024-01-15' },
-  { id: '2', title: 'Code Review Discussion', createdAt: '2024-01-14' },
-  { id: '3', title: 'Architecture Design', createdAt: '2024-01-13' },
-];
 
 export default function Sidebar() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
+  const utils = trpc.useUtils();
+  const chatsQuery = trpc.chat.getChats.useQuery();
+  const createChatMutation = trpc.chat.createChat.useMutation({
+    onSuccess: (chat) => {
+      void utils.chat.getChats.invalidate();
+      router.push(`/dashboard/chat/${chat.id}`);
+    },
+  });
 
   const handleNewChat = () => {
-    const chatId = crypto.randomUUID();
-    router.push(`/dashboard/chat/${chatId}`);
+    createChatMutation.mutate({ title: 'New Chat' });
   };
 
   const handleChatClick = (chatId: string) => {
@@ -52,7 +44,7 @@ export default function Sidebar() {
             <div className="flex items-center text-white">
               <img src="/images/logo.png" alt="" className="w-12" />
               <h1 className="-ml-1 text-[17px] font-medium tracking-tight">
-                Ralic ai
+                Relic ai
               </h1>
             </div>
             <button
@@ -64,17 +56,27 @@ export default function Sidebar() {
             </button>
           </div>
           <div className="flex-1 overflow-y-auto px-3 py-4">
-            <button className="flex w-full items-center gap-2 rounded-[3px] bg-white/5 px-3 py-2.5 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e]">
+            <button
+              onClick={handleNewChat}
+              disabled={createChatMutation.isPending}
+              className="flex w-full items-center gap-2 rounded-[3px] bg-white/5 px-3 py-2.5 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e] disabled:cursor-not-allowed disabled:opacity-50"
+            >
               <IoCreateOutline size={18} className="mb-0.5 opacity-80" />
-              New chat
+              {createChatMutation.isPending ? 'Creating...' : 'New chat'}
             </button>
             <div className="mt-4 space-y-1">
               <p className="mb-2 px-3 text-[13px] font-medium text-white/60">
                 chats
               </p>
-              {dummyChats.map((chat, i) => (
+              {chatsQuery.isLoading && (
+                <p className="px-3 py-2 text-sm text-white/35">Loading...</p>
+              )}
+              {chatsQuery.data?.length === 0 && (
+                <p className="px-3 py-2 text-sm text-white/35">No chats yet</p>
+              )}
+              {chatsQuery.data?.map((chat: Chat) => (
                 <button
-                  key={`${chat.id}-${i}`}
+                  key={chat.id}
                   onClick={() => handleChatClick(chat.id)}
                   className="flex w-full items-center rounded-[3px] px-3 py-2 text-left text-sm text-gray-300 transition-colors hover:bg-[#1e1e1e] hover:text-white"
                 >

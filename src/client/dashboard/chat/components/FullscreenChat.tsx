@@ -4,10 +4,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { BsArrowsAngleContract } from 'react-icons/bs';
 import { IoMdArrowUp } from 'react-icons/io';
 import { FiChevronDown, FiPlus, FiMic } from 'react-icons/fi';
+import MessageContent from './MessageContent';
 
 export interface ChatMessage {
+  id?: string;
   role: 'user' | 'assistant';
   content: string;
+  status?: 'pending' | 'error';
 }
 
 interface FullscreenChatProps {
@@ -15,6 +18,11 @@ interface FullscreenChatProps {
   messages: ChatMessage[];
   onSend: (nodeId: string, message: string) => void;
   onClose: () => void;
+  onTextSelection?: (
+    nodeId: string,
+    selectedText: string,
+    selectionRect: DOMRect
+  ) => void;
 }
 
 export default function FullscreenChat({
@@ -22,6 +30,7 @@ export default function FullscreenChat({
   messages,
   onSend,
   onClose,
+  onTextSelection,
 }: FullscreenChatProps) {
   const [input, setInput] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -53,6 +62,19 @@ export default function FullscreenChat({
     setInput('');
   };
 
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    const selectedText = selection?.toString().trim();
+
+    if (!selection || !selectedText || selection.rangeCount === 0) return;
+
+    onTextSelection?.(
+      nodeId,
+      selectedText,
+      selection.getRangeAt(0).getBoundingClientRect()
+    );
+  };
+
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-black">
       <div className="flex-1 overflow-y-auto">
@@ -79,7 +101,11 @@ export default function FullscreenChat({
               className={`mb-6 ${msg.role === 'user' ? 'flex justify-end' : ''}`}
             >
               {msg.role === 'user' ? (
-                <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-[#2b2b33] px-4 py-3 text-[15px] leading-7 text-gray-200">
+                <div
+                  onMouseUp={handleTextSelection}
+                  onTouchEnd={handleTextSelection}
+                  className="max-w-[85%] rounded-2xl rounded-br-sm bg-[#2b2b33] px-4 py-3 text-[15px] leading-7 text-gray-200"
+                >
                   {msg.content}
                 </div>
               ) : (
@@ -91,11 +117,19 @@ export default function FullscreenChat({
                       className="w-5 opacity-60"
                     />
                     <span className="text-[12px] font-medium text-white/40">
-                      Ralic ai
+                      Relic ai
                     </span>
                   </div>
-                  <div className="rounded-2xl rounded-tl-sm bg-[#1e1e1e] px-4 py-3 text-[15px] leading-7 wrap-anywhere whitespace-pre-wrap text-gray-300">
-                    {msg.content}
+                  <div
+                    onMouseUp={handleTextSelection}
+                    onTouchEnd={handleTextSelection}
+                    className="rounded-2xl rounded-tl-sm bg-[#1e1e1e] px-4 py-3 text-[15px] leading-7 wrap-anywhere text-gray-300"
+                  >
+                    {msg.status === 'pending' && !msg.content ? (
+                      'Thinking...'
+                    ) : (
+                      <MessageContent content={msg.content} />
+                    )}
                   </div>
                 </div>
               )}
