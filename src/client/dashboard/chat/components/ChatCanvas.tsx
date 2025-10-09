@@ -24,6 +24,8 @@ import {
   Background,
   BackgroundVariant,
 } from '@xyflow/react';
+import { FiPlus } from 'react-icons/fi';
+import { trpc } from '@/client/trpc/react';
 
 import ChatNode, {
   CHAT_NODE_HANDLE_IDS,
@@ -46,17 +48,86 @@ const initialNodes: Node<ChatNodeData>[] = [
   },
 ];
 
-function ChatCanvasInner() {
+type TextSelectionAction = {
+  sourceNodeId: string;
+  text: string;
+  x: number;
+  y: number;
+};
+
+type PersistedCanvas = {
+  nodes: Array<{
+    id: string;
+    type?: string;
+    position: { x: number; y: number };
+    data?: {
+      customId: string;
+      initialInput?: string;
+    };
+  }>;
+  edges: Array<{
+    id: string;
+    source: string;
+    sourceHandle?: string | null;
+    target: string;
+    targetHandle?: string | null;
+    type?: string;
+    animated?: boolean;
+  }>;
+};
+
+function serializeCanvas(
+  nodes: Node<ChatNodeData>[],
+  edges: Edge[]
+): PersistedCanvas {
+  return {
+    nodes: nodes.map((node) => ({
+      id: node.id,
+      type: node.type,
+      position: node.position,
+      data: {
+        customId: node.data.customId,
+        initialInput: node.data.initialInput,
+      },
+    })),
+    edges: edges.map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      sourceHandle: edge.sourceHandle,
+      target: edge.target,
+      targetHandle: edge.targetHandle,
+      type: edge.type,
+      animated: edge.animated,
+    })),
+  };
+}
+
+function isPersistedCanvas(value: unknown): value is PersistedCanvas {
+  if (!value || typeof value !== 'object') return false;
+
+  const canvas = value as PersistedCanvas;
+
+  return Array.isArray(canvas.nodes) && Array.isArray(canvas.edges);
+}
+
+function ChatCanvasInner({ chatId }: { chatId: string }) {
+  const utils = trpc.useUtils();
+  const chatQuery = trpc.chat.getChat.useQuery({ chatId });
+  const saveCanvasMutation = trpc.chat.saveCanvas.useMutation();
   const [hasInteracted, setHasInteracted] = useState(false);
   const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null);
+  const [textSelectionAction, setTextSelectionAction] =
+    useState<TextSelectionAction | null>(null);
   const [nodeMessages, setNodeMessages] = useState<
     Record<string, ChatMessage[]>
   >({});
+  const loadedChatIdRef = useRef<string | null>(null);
+  const lastSavedCanvasRef = useRef<string | null>(null);
 
   const setNodesRef = useRef<Dispatch<
     SetStateAction<Node<ChatNodeData>[]>
   > | null>(null);
-  const { screenToFlowPosition, getZoom, setCenter } = useReactFlow();
+  const { screenToFlowPosition, getZoom, getNode, setCenter } = useReactFlow();
 
   const handleUserInteraction = useCallback(() => {
     setHasInteracted(true);
@@ -83,19 +154,121 @@ function ChatCanvasInner() {
     []
   );
 
-  const handleSend = useCallback((nodeId: string, message: string) => {
-    setNodeMessages((prev) => {
-      const current = prev[nodeId] || [];
-      return {
-        ...prev,
-        [nodeId]: [
-          ...current,
-          { role: 'user' as const, content: message },
-          { role: 'assistant' as const, content: `Echo: ${message}` },
-        ],
+  const handleSend = useCallback(
+    (nodeId: string, message: string) => {
+      const userMessage: ChatMessage = { role: 'user', content: message };
+      const pendingMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: '',
+        status: 'pending',
       };
-    });
-  }, []);
+      const conversation = [
+        ...(nodeMessages[nodeId] || []).filter((msg) => !msg.status),
+        userMessage,
+      ].map(({ role, content }) => ({ role, content }));
+
+      setNodeMessages((prev) => {
+        const current = prev[nodeId] || [];
+
+        return {
+          ...prev,
+          [nodeId]: [...current, userMessage, pendingMessage],
+        };
+      });
+
+      void (async () => {
+        try {
+          const response = await fetch('/api/chat/stream', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ chatId, nodeId, messages: conversation }),
+          });
+
+          if (!response.ok) {
+            const errorBody = (await response.json().catch(() => null)) as {
+              error?: string;
+            } | null;
+
+            throw new Error(errorBody?.error || 'AI response failed.');
+          }
+
+          if (!response.body) {
+            throw new Error('AI response stream was empty.');
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let streamedContent = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            streamedContent += chunk;
+
+            setNodeMessages((prev) => ({
+              ...prev,
+              [nodeId]: (prev[nodeId] || []).map((msg) =>
+                msg.id === pendingMessage.id
+                  ? {
+                      ...msg,
+                      content: streamedContent,
+                    }
+                  : msg
+              ),
+            }));
+          }
+
+          const trailingChunk = decoder.decode();
+
+          if (trailingChunk) {
+            streamedContent += trailingChunk;
+          }
+
+          const finalContent =
+            streamedContent.trim() || 'No response returned from the model.';
+
+          setNodeMessages((prev) => ({
+            ...prev,
+            [nodeId]: (prev[nodeId] || []).map((msg) =>
+              msg.id === pendingMessage.id
+                ? {
+                    id: pendingMessage.id,
+                    role: 'assistant',
+                    content: finalContent,
+                  }
+                : msg
+            ),
+          }));
+
+          void utils.chat.getChats.invalidate();
+          void utils.chat.getChat.invalidate({ chatId });
+        } catch (error) {
+          setNodeMessages((prev) => ({
+            ...prev,
+            [nodeId]: (prev[nodeId] || []).map((msg) =>
+              msg.id === pendingMessage.id
+                ? {
+                    ...msg,
+                    content:
+                      error instanceof Error
+                        ? error.message
+                        : 'AI response failed.',
+                    status: 'error',
+                  }
+                : msg
+            ),
+          }));
+        }
+      })();
+    },
+    [chatId, nodeMessages, utils.chat.getChat, utils.chat.getChats]
+  );
 
   const handleExpand = useCallback((nodeId: string) => {
     setExpandedNodeId(nodeId);
@@ -104,6 +277,25 @@ function ChatCanvasInner() {
   const handleCloseFullscreen = useCallback(() => {
     setExpandedNodeId(null);
   }, []);
+
+  const handleTextSelection = useCallback(
+    (nodeId: string, selectedText: string, selectionRect: DOMRect) => {
+      const text = selectedText.trim();
+
+      if (!text) {
+        setTextSelectionAction(null);
+        return;
+      }
+
+      setTextSelectionAction({
+        sourceNodeId: nodeId,
+        text,
+        x: selectionRect.left + selectionRect.width / 2,
+        y: Math.max(16, selectionRect.top - 46),
+      });
+    },
+    []
+  );
 
   const syncNodeInteractionHandler = useCallback(
     (nextNodes: Node<ChatNodeData>[], msgs: Record<string, ChatMessage[]>) =>
@@ -116,6 +308,7 @@ function ChatCanvasInner() {
           onResponseHeightChange: handleResponseHeightChange,
           onSend: handleSend,
           onExpand: handleExpand,
+          onTextSelection: handleTextSelection,
         },
       })),
     [
@@ -123,6 +316,7 @@ function ChatCanvasInner() {
       handleResponseHeightChange,
       handleSend,
       handleExpand,
+      handleTextSelection,
     ]
   );
 
@@ -130,6 +324,138 @@ function ChatCanvasInner() {
     syncNodeInteractionHandler(initialNodes, {})
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+
+  useEffect(() => {
+    if (!chatQuery.data || loadedChatIdRef.current === chatId) return;
+
+    const messagesByNode = chatQuery.data.messages.reduce<
+      Record<string, ChatMessage[]>
+    >((acc, message) => {
+      if (message.role !== 'user' && message.role !== 'assistant') return acc;
+
+      acc[message.nodeId] = [
+        ...(acc[message.nodeId] || []),
+        {
+          id: message.id,
+          role: message.role,
+          content: message.content,
+        },
+      ];
+
+      return acc;
+    }, {});
+    const savedCanvas = isPersistedCanvas(chatQuery.data.canvas)
+      ? chatQuery.data.canvas
+      : null;
+    const nextNodes = savedCanvas?.nodes.length
+      ? savedCanvas.nodes.map(
+          (node): Node<ChatNodeData> => ({
+            id: node.id,
+            type: node.type || 'chatNode',
+            position: node.position,
+            data: {
+              customId: node.data?.customId || node.id,
+              initialInput: node.data?.initialInput,
+            },
+          })
+        )
+      : initialNodes;
+    const nextEdges = savedCanvas?.edges.length ? savedCanvas.edges : [];
+
+    setNodeMessages(messagesByNode);
+    setHasInteracted(Object.keys(messagesByNode).length > 0);
+    setNodes(syncNodeInteractionHandler(nextNodes, messagesByNode));
+    setEdges(nextEdges);
+
+    loadedChatIdRef.current = chatId;
+    lastSavedCanvasRef.current = JSON.stringify(
+      serializeCanvas(nextNodes, nextEdges)
+    );
+  }, [chatId, chatQuery.data, setEdges, setNodes, syncNodeInteractionHandler]);
+
+  useEffect(() => {
+    if (!chatQuery.data || loadedChatIdRef.current !== chatId) return;
+
+    const canvas = serializeCanvas(nodes, edges);
+    const signature = JSON.stringify(canvas);
+
+    if (lastSavedCanvasRef.current === signature) return;
+
+    const timeout = window.setTimeout(() => {
+      lastSavedCanvasRef.current = signature;
+      saveCanvasMutation.mutate({ chatId, canvas });
+    }, 600);
+
+    return () => window.clearTimeout(timeout);
+  }, [chatId, chatQuery.data, edges, nodes, saveCanvasMutation]);
+
+  const handleCreateNodeFromSelection = useCallback(() => {
+    if (!textSelectionAction) return;
+
+    const sourceNode = getNode(textSelectionAction.sourceNodeId);
+    const id = crypto.randomUUID();
+    const sourceNodeWidth = sourceNode?.measured?.width ?? CHAT_NODE_WIDTH;
+    const sourceNodeHeight = sourceNode?.measured?.height ?? 180;
+    const sourcePosition = sourceNode?.position ?? { x: 0, y: 0 };
+    const newNodePosition = {
+      x: sourcePosition.x + sourceNodeWidth + 160,
+      y: sourcePosition.y + 40,
+    };
+
+    const newNode: Node<ChatNodeData> = {
+      id,
+      type: 'chatNode',
+      position: newNodePosition,
+      data: {
+        customId: id,
+        initialInput: textSelectionAction.text,
+        messages: [],
+        onInteract: handleUserInteraction,
+        onResponseHeightChange: handleResponseHeightChange,
+        onSend: handleSend,
+        onExpand: handleExpand,
+        onTextSelection: handleTextSelection,
+      },
+    };
+
+    setHasInteracted(true);
+    setExpandedNodeId(null);
+    setTextSelectionAction(null);
+    window.getSelection()?.removeAllRanges();
+
+    setNodes((nds) => nds.concat(newNode));
+    setEdges((eds) =>
+      eds.concat({
+        id: `e-${textSelectionAction.sourceNodeId}-${id}`,
+        source: textSelectionAction.sourceNodeId,
+        sourceHandle: CHAT_NODE_HANDLE_IDS.right,
+        target: id,
+        targetHandle: CHAT_NODE_HANDLE_IDS.left,
+        type: 'floating',
+      })
+    );
+
+    void setCenter(
+      sourcePosition.x + sourceNodeWidth + 80,
+      sourcePosition.y + sourceNodeHeight / 2,
+      {
+        duration: 350,
+        ease: (t) => 1 - Math.pow(1 - t, 3),
+        zoom: getZoom(),
+      }
+    );
+  }, [
+    getNode,
+    getZoom,
+    handleExpand,
+    handleResponseHeightChange,
+    handleSend,
+    handleTextSelection,
+    handleUserInteraction,
+    setCenter,
+    setEdges,
+    textSelectionAction,
+  ]);
 
   useEffect(() => {
     setNodesRef.current = setNodes;
@@ -249,6 +575,16 @@ function ChatCanvasInner() {
 
   return (
     <div className="relative h-screen w-full bg-black">
+      {chatQuery.isLoading && (
+        <div className="absolute inset-0 z-[80] flex items-center justify-center bg-black text-sm text-white/50">
+          Loading chat...
+        </div>
+      )}
+      {chatQuery.error && (
+        <div className="absolute inset-0 z-[80] flex items-center justify-center bg-black px-6 text-center text-sm text-red-300">
+          {chatQuery.error.message}
+        </div>
+      )}
       <div
         aria-hidden={hasInteracted}
         className={`pointer-events-none absolute top-75 right-138 z-20 flex w-100 items-center text-white/70 transition-all duration-500 ease-out ${
@@ -268,11 +604,11 @@ function ChatCanvasInner() {
             />
             <div>
               <h1 className="-ml-[16px] text-[42px] font-semibold -tracking-[2px]">
-                Ralic ai
+                Relic ai
               </h1>
             </div>
           </div>
-          <p className="-mt-4 px-5">Welcome back Vikas pal to ralic ai</p>
+          <p className="-mt-4 px-5">Welcome back Vikas pal to relic ai</p>
         </div>
       </div>
       <ReactFlow
@@ -292,7 +628,14 @@ function ChatCanvasInner() {
         minZoom={0.01}
         maxZoom={100}
         fitViewOptions={{ maxZoom: 1 }}
-      ></ReactFlow>
+      >
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={12}
+          size={1.5}
+          color="#212121"
+        />
+      </ReactFlow>
 
       {expandedNodeId && (
         <FullscreenChat
@@ -300,16 +643,34 @@ function ChatCanvasInner() {
           messages={nodeMessages[expandedNodeId] || []}
           onSend={handleSend}
           onClose={handleCloseFullscreen}
+          onTextSelection={handleTextSelection}
         />
+      )}
+
+      {textSelectionAction && (
+        <button
+          type="button"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={handleCreateNodeFromSelection}
+          className="fixed z-[70] flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/10 bg-[#202020] px-3 py-2 text-[13px] font-medium text-white shadow-2xl shadow-black/40 transition-colors hover:bg-[#303030]"
+          style={{
+            left: textSelectionAction.x,
+            top: textSelectionAction.y,
+          }}
+          title="Create node from selection"
+        >
+          <FiPlus size={15} />
+          New node
+        </button>
       )}
     </div>
   );
 }
 
-export default function ChatCanvas() {
+export default function ChatCanvas({ chatId }: { chatId: string }) {
   return (
     <ReactFlowProvider>
-      <ChatCanvasInner />
+      <ChatCanvasInner chatId={chatId} />
     </ReactFlowProvider>
   );
 }
