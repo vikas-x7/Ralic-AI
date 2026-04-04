@@ -10,9 +10,11 @@ import {
 } from 'react';
 import { FiChevronDown, FiPlus, FiMic } from 'react-icons/fi';
 import { IoMdArrowUp } from 'react-icons/io';
-import { BsArrowsFullscreen } from 'react-icons/bs';
+import { BsArrowsFullscreen, BsFileMusic } from 'react-icons/bs';
 import type { ChatMessage } from './FullscreenChat';
 import MessageContent from './MessageContent';
+import { FcGoogle } from 'react-icons/fc';
+import { LiaLinkSolid } from 'react-icons/lia';
 
 export type ChatNodeData = {
   customId: string;
@@ -30,7 +32,7 @@ export type ChatNodeData = {
 };
 
 export const CHAT_NODE_WIDTH = 750;
-export const CHAT_NODE_HANDLE_TOP = 20;
+export const CHAT_NODE_HANDLE_TOP = 25;
 const CHAT_INPUT_LINE_HEIGHT = 32;
 const CHAT_INPUT_MAX_LINES = 7;
 const CHAT_INPUT_MAX_HEIGHT = CHAT_INPUT_LINE_HEIGHT * CHAT_INPUT_MAX_LINES;
@@ -44,10 +46,9 @@ export const CHAT_NODE_HANDLE_IDS = {
 const baseHandleStyle = {
   width: 17,
   height: 17,
-  background: '#2b2b33',
+  // background: '#2b2b33',
   borderRadius: '50%',
-  border: '4px solid #f1a0faa7',
-  top: CHAT_NODE_HANDLE_TOP,
+  border: '4px solid #d6d6d6',
   zIndex: 10,
 } as const;
 
@@ -120,23 +121,18 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
       <div className="flex items-center justify-between border-b border-[#1f1f1f] p-3 py-4" />
 
       {messages.length > 0 && (
-        <div
-          ref={responseSectionRef}
-          className="space-y-3 border-b border-[#1f1f1f] px-4 py-3"
-        >
+        <div ref={responseSectionRef} className="space-y-3 px-4 py-3">
           {messages.map((msg, i) => (
             <div
               key={i}
               onMouseUp={handleTextSelection}
               onTouchEnd={handleTextSelection}
-              className={`${CHAT_TEXT_INTERACTION_CLASS} rounded-[1px] px-4 py-3 text-[18px] leading-7 wrap-anywhere text-gray-200 ${
-                msg.role === 'user' ? 'ml-8 bg-[#202020]' : 'mr-8 bg-[#202020]'
+              className={`${CHAT_TEXT_INTERACTION_CLASS} rounded-[5px] px-4 py-3 text-[18px] leading-7 wrap-anywhere text-gray-200 ${
+                msg.role === 'user' ? 'ml-8 bg-[#202020]' : 'mr-8'
               }`}
             >
               {msg.role === 'assistant' && (
-                <span className="mb-1 block text-[11px] font-medium text-white/30">
-                  Relic ai
-                </span>
+                <span className="mb-1 block text-[19px] font-medium text-white/30"></span>
               )}
               {msg.status === 'pending' && !msg.content ? (
                 'Thinking...'
@@ -150,8 +146,8 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
         </div>
       )}
 
-      <div className="">
-        <div className="bg-[#121212] px-4 py-3 shadow-lg">
+      <div className="relative">
+        <div className="border-t border-[#1f1f1f] bg-[#121212] px-4 pt-10 pb-5 shadow-lg">
           <textarea
             ref={textareaRef}
             rows={1}
@@ -176,32 +172,24 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
             }}
           />
 
-          <div className="mt-3 flex items-center justify-between text-white/70">
-            <div className="flex items-center gap-2">
+          <div className="mt-3 flex cursor-pointer items-center justify-between text-white/70">
+            <div className="flex items-center gap-1">
               <button
-                className={`${CHAT_TEXT_INTERACTION_CLASS} flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-[#303030] hover:text-white`}
+                className={`flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-3 py-0.5`}
               >
-                <FiPlus size={20} />
+                <FcGoogle size={14} />
+                <span>Gemma-2</span>
               </button>
             </div>
 
             <div className="flex items-center gap-2">
-              <div
-                className={`${CHAT_TEXT_INTERACTION_CLASS} flex cursor-pointer items-center gap-1 rounded-full px-3 py-1.5 text-[14px] transition-colors hover:bg-[#303030] hover:text-white`}
-              >
-                <span>Model</span>
-                <FiChevronDown size={14} />
-              </div>
-
-              <button
-                className={`${CHAT_TEXT_INTERACTION_CLASS} flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-[#303030] hover:text-white`}
-              >
-                <FiMic size={18} />
+              <button className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] transition-colors hover:bg-[#303030] hover:text-white">
+                <LiaLinkSolid size={18} />
               </button>
 
               <button
                 onClick={() => onExpand?.(customId)}
-                className="nodrag nopan flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors hover:bg-[#303030] hover:text-white"
+                className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center gap-1.5 rounded-[5px] border border-[#303030] text-[13px] transition-colors hover:bg-[#303030] hover:text-white"
                 title="Open fullscreen chat"
               >
                 <BsArrowsFullscreen size={14} />
@@ -210,36 +198,38 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
               <button
                 onClick={handleSend}
                 disabled={!input.trim()}
-                className={`${CHAT_TEXT_INTERACTION_CLASS} ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white transition-all hover:bg-white/30 disabled:opacity-30 disabled:hover:bg-white/20`}
+                className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/30 disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white"
               >
                 <IoMdArrowUp size={18} />
               </button>
             </div>
           </div>
         </div>
+
+        <Handle
+          type="source"
+          id={CHAT_NODE_HANDLE_IDS.right}
+          position={Position.Right}
+          className="scale-75 opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100"
+          style={{
+            ...baseHandleStyle,
+            right: 25,
+            top: 20,
+          }}
+        />
+
+        <Handle
+          type="source"
+          id={CHAT_NODE_HANDLE_IDS.left}
+          position={Position.Left}
+          className="scale-75 opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100"
+          style={{
+            ...baseHandleStyle,
+            left: 25,
+            top: 20,
+          }}
+        />
       </div>
-
-      <Handle
-        type="source"
-        id={CHAT_NODE_HANDLE_IDS.right}
-        position={Position.Right}
-        className="scale-75 opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100"
-        style={{
-          ...baseHandleStyle,
-          right: 25,
-        }}
-      />
-
-      <Handle
-        type="source"
-        id={CHAT_NODE_HANDLE_IDS.left}
-        position={Position.Left}
-        className="scale-75 opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100"
-        style={{
-          ...baseHandleStyle,
-          left: 25,
-        }}
-      />
     </div>
   );
 }

@@ -23,6 +23,7 @@ import {
   applyNodeChanges,
   Background,
   BackgroundVariant,
+  MiniMap,
 } from '@xyflow/react';
 import { FiPlus } from 'react-icons/fi';
 import { trpc } from '@/client/trpc/react';
@@ -628,12 +629,29 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
         minZoom={0.01}
         maxZoom={100}
         fitViewOptions={{ maxZoom: 1 }}
+        proOptions={{ hideAttribution: true }}
       >
         <Background
           variant={BackgroundVariant.Dots}
           gap={12}
           size={1.5}
           color="#212121"
+        />
+        <MiniMap
+          style={{
+            width: 120,
+            height: 80,
+            position: 'fixed',
+            background: '#000',
+          }}
+          className="overflow-hidden rounded-md border border-[#222]"
+          pannable
+          zoomable
+          nodeColor={() => '#555'} // nodes color
+          nodeStrokeColor={() => '#999'}
+          nodeBorderRadius={2}
+          bgColor="#000" // background fix
+          maskColor="rgba(255,255,255,0.05)" // vewport overlay
         />
       </ReactFlow>
 

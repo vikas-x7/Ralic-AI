@@ -68,7 +68,7 @@ export default function LoginPage({ error }: LoginPageProps) {
         <img
           src="https://i.pinimg.com/1200x/61/6b/bc/616bbc1d07a65b544370efe359bff1e0.jpg"
           alt=""
-          className="h-screen w-full object-cover opacity-40 grayscale"
+          className="h-screen w-full object-cover opacity-40"
         />
 
         <div className="absolute bottom-[3%] left-[3%]">

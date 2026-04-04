@@ -5,6 +5,8 @@ import { BsArrowsAngleContract } from 'react-icons/bs';
 import { IoMdArrowUp } from 'react-icons/io';
 import { FiChevronDown, FiPlus, FiMic } from 'react-icons/fi';
 import MessageContent from './MessageContent';
+import { FcGoogle } from 'react-icons/fc';
+import { LiaLinkSolid } from 'react-icons/lia';
 
 export interface ChatMessage {
   id?: string;
@@ -104,26 +106,17 @@ export default function FullscreenChat({
                 <div
                   onMouseUp={handleTextSelection}
                   onTouchEnd={handleTextSelection}
-                  className="max-w-[85%] rounded-2xl rounded-br-sm bg-[#2b2b33] px-4 py-3 text-[15px] leading-7 text-gray-200"
+                  className="py- max-w-[85%] rounded-2xl rounded-br-sm bg-[#202020] px-4 text-[15px] leading-7 text-gray-200"
                 >
                   {msg.content}
                 </div>
               ) : (
                 <div className="max-w-[85%]">
-                  <div className="mb-1 flex items-center gap-2">
-                    <img
-                      src="/images/logo.png"
-                      alt=""
-                      className="w-5 opacity-60"
-                    />
-                    <span className="text-[12px] font-medium text-white/40">
-                      Relic ai
-                    </span>
-                  </div>
+                  <div className="mb-1 flex items-center"></div>
                   <div
                     onMouseUp={handleTextSelection}
                     onTouchEnd={handleTextSelection}
-                    className="rounded-2xl rounded-tl-sm bg-[#1e1e1e] px-4 py-3 text-[15px] leading-7 wrap-anywhere text-gray-300"
+                    className="rounded-2xl rounded-tl-sm px-4 py-3 text-[15px] leading-7 wrap-anywhere text-gray-300"
                   >
                     {msg.status === 'pending' && !msg.content ? (
                       'Thinking...'
@@ -159,21 +152,19 @@ export default function FullscreenChat({
             }}
           />
 
-          <div className="mt-3 flex items-center justify-between text-white/70">
-            <div className="flex items-center gap-2">
-              <button className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-[#303030] hover:text-white">
-                <FiPlus size={20} />
+          <div className="mt-3 flex cursor-pointer items-center justify-between text-white/70">
+            <div className="flex items-center gap-1">
+              <button
+                className={`flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-3 py-0.5`}
+              >
+                <FcGoogle size={14} />
+                <span>Gemma-2</span>
               </button>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="flex cursor-pointer items-center gap-1 rounded-full px-3 py-1.5 text-[14px] transition-colors hover:bg-[#303030] hover:text-white">
-                <span>Model</span>
-                <FiChevronDown size={14} />
-              </div>
-
-              <button className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-[#303030] hover:text-white">
-                <FiMic size={18} />
+              <button className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] transition-colors hover:bg-[#303030] hover:text-white">
+                <LiaLinkSolid size={18} />
               </button>
 
               <button
@@ -187,7 +178,7 @@ export default function FullscreenChat({
               <button
                 onClick={handleSend}
                 disabled={!input.trim()}
-                className="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white transition-all hover:bg-white/30 disabled:opacity-30 disabled:hover:bg-white/20"
+                className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/30 disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white"
               >
                 <IoMdArrowUp size={18} />
               </button>
