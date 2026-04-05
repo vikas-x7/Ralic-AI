@@ -23,10 +23,38 @@ type MessageBlock =
 
 type MessageContentProps = {
   content: string;
+  isUser?: boolean;
 };
 
-export default function MessageContent({ content }: MessageContentProps) {
-  const blocks = parseMessageBlocks(content);
+function isCodeLike(text: string) {
+  if (text.includes('```')) return false;
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return false;
+  let codeLines = 0;
+  for (const line of lines) {
+    if (
+      /[{}[\]();]/.test(line) ||
+      /^(import|export|const|let|var|function|class|interface|type)\b/.test(
+        line
+      ) ||
+      /^\s+/.test(line) ||
+      /<[^>]+>/.test(line)
+    ) {
+      codeLines++;
+    }
+  }
+  return codeLines / lines.length > 0.4;
+}
+
+export default function MessageContent({
+  content,
+  isUser,
+}: MessageContentProps) {
+  let finalContent = content;
+  if (isUser && isCodeLike(content)) {
+    finalContent = `\`\`\`\n${content}\n\`\`\``;
+  }
+  const blocks = parseMessageBlocks(finalContent);
 
   return (
     <div className="space-y-3">

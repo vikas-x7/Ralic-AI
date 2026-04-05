@@ -108,7 +108,10 @@ export default function FullscreenChat({
                   onTouchEnd={handleTextSelection}
                   className="py- max-w-[85%] rounded-2xl rounded-br-sm bg-[#202020] px-4 text-[15px] leading-7 text-gray-200"
                 >
-                  {msg.content}
+                  <MessageContent
+                    content={msg.content}
+                    isUser={msg.role === 'user'}
+                  />
                 </div>
               ) : (
                 <div className="max-w-[85%]">

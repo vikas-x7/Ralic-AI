@@ -136,10 +136,11 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
               )}
               {msg.status === 'pending' && !msg.content ? (
                 'Thinking...'
-              ) : msg.role === 'assistant' ? (
-                <MessageContent content={msg.content} />
               ) : (
-                msg.content
+                <MessageContent
+                  content={msg.content}
+                  isUser={msg.role === 'user'}
+                />
               )}
             </div>
           ))}

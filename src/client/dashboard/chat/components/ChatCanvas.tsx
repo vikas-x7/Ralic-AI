@@ -466,6 +466,23 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     setNodes((nds) => syncNodeInteractionHandler(nds, nodeMessages));
   }, [nodeMessages, syncNodeInteractionHandler]);
 
+  useEffect(() => {
+    if (!textSelectionAction) return;
+
+    const handleDocumentClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('#new-node-btn')) return;
+
+      setTextSelectionAction(null);
+      window.getSelection()?.removeAllRanges();
+    };
+
+    document.addEventListener('mousedown', handleDocumentClick);
+    return () => {
+      document.removeEventListener('mousedown', handleDocumentClick);
+    };
+  }, [textSelectionAction]);
+
   const onNodesChange = useCallback(
     (changes: NodeChange<Node<ChatNodeData>>[]) => {
       setNodes((nds) =>
@@ -667,10 +684,11 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
 
       {textSelectionAction && (
         <button
+          id="new-node-btn"
           type="button"
           onMouseDown={(event) => event.preventDefault()}
           onClick={handleCreateNodeFromSelection}
-          className="fixed z-[70] flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/10 bg-[#202020] px-3 py-2 text-[13px] font-medium text-white shadow-2xl shadow-black/40 transition-colors hover:bg-[#303030]"
+          className="fixed z-[70] flex -translate-x-1/2 items-center gap-1.5 rounded-[5px] border border-white/10 bg-[#202020] px-3 py-1 text-[13px] font-medium text-white shadow-2xl shadow-black/40 transition-colors hover:bg-[#303030]"
           style={{
             left: textSelectionAction.x,
             top: textSelectionAction.y,
