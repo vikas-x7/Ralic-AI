@@ -17,6 +17,7 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const utils = trpc.useUtils();
   const chatsQuery = trpc.chat.getChats.useQuery();
+  const userQuery = trpc.auth.getUser.useQuery();
   const createChatMutation = trpc.chat.createChat.useMutation({
     onSuccess: (chat) => {
       void utils.chat.getChats.invalidate();
@@ -40,10 +41,10 @@ export default function Sidebar() {
         }`}
       >
         <div className="flex h-full w-[260px] flex-col">
-          <div className="flex items-center justify-between border-b border-[#2a2a2a] pr-3 pb-1">
+          <div className="flex items-center justify-between border-b border-[#2a2a2a] pr-3">
             <div className="flex items-center text-white">
-              <img src="/images/logo.png" alt="" className="w-12" />
-              <h1 className="-ml-1 text-[17px] font-medium tracking-tight">
+              <img src="/images/logo.png" alt="" className="w-10" />
+              <h1 className="mt-0.5 -ml-1 text-[17px] font-medium tracking-tight">
                 Relic ai
               </h1>
             </div>
@@ -55,16 +56,16 @@ export default function Sidebar() {
               <FiSidebar size={18} />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto px-3 py-4">
+          <div className="flex-1 overflow-y-auto px-2 py-4">
             <button
               onClick={handleNewChat}
               disabled={createChatMutation.isPending}
-              className="flex w-full items-center gap-2 rounded-[3px] bg-white/5 px-3 py-2.5 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center gap-2 rounded-[3px] bg-white/5 px-3 py-2 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <IoCreateOutline size={18} className="mb-0.5 opacity-80" />
               {createChatMutation.isPending ? 'Creating...' : 'New chat'}
             </button>
-            <div className="mt-4 space-y-1">
+            <div className="mt-4 space-y-2">
               <p className="mb-2 px-3 text-[13px] font-medium text-white/60">
                 chats
               </p>
@@ -78,25 +79,35 @@ export default function Sidebar() {
                 <button
                   key={chat.id}
                   onClick={() => handleChatClick(chat.id)}
-                  className="flex w-full items-center rounded-[3px] px-3 py-2 text-left text-sm text-gray-300 transition-colors hover:bg-[#1e1e1e] hover:text-white"
+                  className="flex w-full items-center rounded-[3px] px-3 py-1 text-left text-sm text-gray-300 transition-colors hover:bg-[#1e1e1e] hover:text-white"
                 >
                   <span className="truncate">{chat.title}</span>
                 </button>
               ))}
             </div>
           </div>
-          <div className="flex items-center justify-between border-t border-[#2a2a2a] px-4 py-3">
+          <div className="flex items-center justify-between border-t border-white/10 px-2 py-1">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-white/10 text-sm font-semibold text-white">
-                VP
-              </div>
+              {userQuery.data?.image ? (
+                <img
+                  src={userQuery.data.image}
+                  alt={userQuery.data.name || ''}
+                  className="h-7 w-7 rounded-sm object-cover"
+                />
+              ) : (
+                <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-white/10 text-sm font-semibold text-white uppercase">
+                  {userQuery.data?.name?.[0] ||
+                    userQuery.data?.email?.[0] ||
+                    'U'}
+                </div>
+              )}
 
               <div className="flex flex-col">
-                <span className="text-[13px] font-medium text-white">
-                  vikas pal
+                <span className="max-w-[120px] truncate text-[13px] font-medium text-white">
+                  {userQuery.data?.name || 'User'}
                 </span>
-                <span className="text-[11px] text-white/40">
-                  vikaspal968562@gmail.com
+                <span className="max-w-[120px] truncate text-[11px] text-white/40">
+                  {userQuery.data?.email || ''}
                 </span>
               </div>
             </div>

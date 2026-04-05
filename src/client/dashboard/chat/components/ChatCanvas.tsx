@@ -128,7 +128,8 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   const setNodesRef = useRef<Dispatch<
     SetStateAction<Node<ChatNodeData>[]>
   > | null>(null);
-  const { screenToFlowPosition, getZoom, getNode, setCenter } = useReactFlow();
+  const { screenToFlowPosition, getZoom, getNode, setCenter, fitView } =
+    useReactFlow();
 
   const handleUserInteraction = useCallback(() => {
     setHasInteracted(true);
@@ -372,7 +373,20 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     lastSavedCanvasRef.current = JSON.stringify(
       serializeCanvas(nextNodes, nextEdges)
     );
-  }, [chatId, chatQuery.data, setEdges, setNodes, syncNodeInteractionHandler]);
+
+    setTimeout(() => {
+      window.requestAnimationFrame(() => {
+        fitView({ duration: 800, padding: 0.1, maxZoom: 1 });
+      });
+    }, 100);
+  }, [
+    chatId,
+    chatQuery.data,
+    setEdges,
+    setNodes,
+    syncNodeInteractionHandler,
+    fitView,
+  ]);
 
   useEffect(() => {
     if (!chatQuery.data || loadedChatIdRef.current !== chatId) return;
