@@ -1,8 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { FiLogOut, FiSidebar } from 'react-icons/fi';
+import { FiLogOut, FiSearch, FiSidebar } from 'react-icons/fi';
 import { IoCreateOutline } from 'react-icons/io5';
 import { trpc } from '@/client/trpc/react';
 
@@ -12,8 +12,14 @@ interface Chat {
   createdAt: Date;
 }
 
-export default function Sidebar() {
+interface SidebarProps {
+  onOpenSearch: () => void;
+}
+
+export default function Sidebar({ onOpenSearch }: SidebarProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const activeChatId = pathname.match(/^\/dashboard\/chat\/([^/]+)/)?.[1];
   const [isOpen, setIsOpen] = useState(true);
   const utils = trpc.useUtils();
   const chatsQuery = trpc.chat.getChats.useQuery();
@@ -65,6 +71,13 @@ export default function Sidebar() {
               <IoCreateOutline size={18} className="mb-0.5 opacity-80" />
               {createChatMutation.isPending ? 'Creating...' : 'New chat'}
             </button>
+            <button
+              onClick={onOpenSearch}
+              className="mt-2 flex w-full items-center gap-2 rounded-[3px] px-3 py-2 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e] hover:text-white"
+            >
+              <FiSearch size={17} className="opacity-80" />
+              Search
+            </button>
             <div className="mt-4 space-y-2">
               <p className="mb-2 px-3 text-[13px] font-medium text-white/60">
                 chats
@@ -75,15 +88,24 @@ export default function Sidebar() {
               {chatsQuery.data?.length === 0 && (
                 <p className="px-3 py-2 text-sm text-white/35">No chats yet</p>
               )}
-              {chatsQuery.data?.map((chat: Chat) => (
-                <button
-                  key={chat.id}
-                  onClick={() => handleChatClick(chat.id)}
-                  className="flex w-full items-center rounded-[3px] px-3 py-1 text-left text-sm text-gray-300 transition-colors hover:bg-[#1e1e1e] hover:text-white"
-                >
-                  <span className="truncate">{chat.title}</span>
-                </button>
-              ))}
+              {chatsQuery.data?.map((chat: Chat) => {
+                const isActive = activeChatId === chat.id;
+
+                return (
+                  <button
+                    key={chat.id}
+                    onClick={() => handleChatClick(chat.id)}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`flex w-full items-center rounded-[3px] px-3 py-1 text-left text-sm transition-colors ${
+                      isActive
+                        ? 'bg-[#242424] text-white'
+                        : 'text-gray-300 hover:bg-[#1e1e1e] hover:text-white'
+                    }`}
+                  >
+                    <span className="truncate">{chat.title}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
           <div className="flex items-center justify-between border-t border-white/10 px-2 py-1">

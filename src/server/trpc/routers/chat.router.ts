@@ -77,6 +77,68 @@ export const chatRouter = createTRPCRouter({
     });
   }),
 
+  searchChats: protectedProcedure
+    .input(
+      z.object({
+        query: z.string().trim().max(120),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = getUserId(ctx.user);
+      const query = input.query.trim();
+
+      if (!query) {
+        return [];
+      }
+
+      return ctx.db.chat.findMany({
+        where: {
+          userId,
+          OR: [
+            {
+              title: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+            {
+              messages: {
+                some: {
+                  content: {
+                    contains: query,
+                    mode: 'insensitive',
+                  },
+                },
+              },
+            },
+          ],
+        },
+        orderBy: { updatedAt: 'desc' },
+        take: 20,
+        select: {
+          id: true,
+          title: true,
+          updatedAt: true,
+          messages: {
+            where: {
+              content: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 3,
+            select: {
+              id: true,
+              role: true,
+              content: true,
+              createdAt: true,
+            },
+          },
+        },
+      });
+    }),
+
   getChat: protectedProcedure
     .input(z.object({ chatId: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
