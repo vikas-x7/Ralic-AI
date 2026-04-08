@@ -80,7 +80,7 @@ export default function FullscreenChat({
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-black">
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-[768px] px-4 py-6 pb-36">
+        <div className="mx-auto max-w-[768px] px-4 py-6">
           {messages.length === 0 && (
             <div className="flex h-full min-h-[60vh] flex-col items-center justify-center text-center">
               <img
@@ -135,56 +135,58 @@ export default function FullscreenChat({
         </div>
       </div>
 
-      <div className="absolute bottom-6 left-1/2 w-full max-w-[768px] -translate-x-1/2 px-4">
-        <div className="rounded-[9px] bg-[#121212] px-4 py-3 shadow-lg">
-          <textarea
-            ref={textareaRef}
-            rows={1}
-            value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-              resizeTextarea(e.currentTarget);
-            }}
-            placeholder="Ask a follow-up"
-            className="w-full resize-none overflow-y-hidden bg-transparent py-1 text-[16px] leading-6 text-gray-200 placeholder-white/40 outline-none"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-          />
+      <div className="shrink-0 bg-black px-4 py-4">
+        <div className="mx-auto w-full max-w-[768px]">
+          <div className="rounded-[9px] bg-[#121212] px-4 py-3 shadow-lg">
+            <textarea
+              ref={textareaRef}
+              rows={1}
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value);
+                resizeTextarea(e.currentTarget);
+              }}
+              placeholder="Ask a follow-up"
+              className="w-full resize-none overflow-y-hidden bg-transparent py-1 text-[16px] leading-6 text-gray-200 placeholder-white/40 outline-none"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+            />
 
-          <div className="mt-3 flex cursor-pointer items-center justify-between text-white/70">
-            <div className="flex items-center gap-1">
-              <button
-                className={`flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-3 py-0.5`}
-              >
-                <FcGoogle size={14} />
-                <span>Gemma-2</span>
-              </button>
-            </div>
+            <div className="mt-3 flex cursor-pointer items-center justify-between text-white/70">
+              <div className="flex items-center gap-1">
+                <button
+                  className={`flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-3 py-0.5`}
+                >
+                  <FcGoogle size={14} />
+                  <span>Gemma-2</span>
+                </button>
+              </div>
 
-            <div className="flex items-center gap-2">
-              <button className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] transition-colors hover:bg-[#303030] hover:text-white">
-                <LiaLinkSolid size={18} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] transition-colors hover:bg-[#303030] hover:text-white">
+                  <LiaLinkSolid size={18} />
+                </button>
 
-              <button
-                onClick={onClose}
-                className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors hover:bg-[#303030] hover:text-white"
-                title="Collapse to node view"
-              >
-                <BsArrowsAngleContract size={14} />
-              </button>
+                <button
+                  onClick={onClose}
+                  className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors hover:bg-[#303030] hover:text-white"
+                  title="Collapse to node view"
+                >
+                  <BsArrowsAngleContract size={14} />
+                </button>
 
-              <button
-                onClick={handleSend}
-                disabled={!input.trim()}
-                className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/30 disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white"
-              >
-                <IoMdArrowUp size={18} />
-              </button>
+                <button
+                  onClick={handleSend}
+                  disabled={!input.trim()}
+                  className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/30 disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white"
+                >
+                  <IoMdArrowUp size={18} />
+                </button>
+              </div>
             </div>
           </div>
         </div>

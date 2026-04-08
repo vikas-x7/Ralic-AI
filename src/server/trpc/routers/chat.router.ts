@@ -202,6 +202,30 @@ export const chatRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = getUserId(ctx.user);
+      const emptyChat = await ctx.db.chat.findFirst({
+        where: {
+          userId,
+          messages: {
+            none: {},
+          },
+        },
+        orderBy: { updatedAt: 'desc' },
+        select: {
+          id: true,
+          title: true,
+        },
+      });
+
+      if (emptyChat) {
+        return ctx.db.chat.update({
+          where: { id: emptyChat.id },
+          data: { updatedAt: new Date() },
+          select: {
+            id: true,
+            title: true,
+          },
+        });
+      }
 
       return ctx.db.chat.create({
         data: {

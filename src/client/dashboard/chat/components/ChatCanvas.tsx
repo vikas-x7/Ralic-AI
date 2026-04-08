@@ -25,7 +25,7 @@ import {
   BackgroundVariant,
   MiniMap,
 } from '@xyflow/react';
-import { FiPlus } from 'react-icons/fi';
+import { FiColumns, FiMinus, FiPlus } from 'react-icons/fi';
 import { trpc } from '@/client/trpc/react';
 
 import ChatNode, {
@@ -128,8 +128,15 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   const setNodesRef = useRef<Dispatch<
     SetStateAction<Node<ChatNodeData>[]>
   > | null>(null);
-  const { screenToFlowPosition, getZoom, getNode, setCenter, fitView } =
-    useReactFlow();
+  const {
+    screenToFlowPosition,
+    getZoom,
+    getNode,
+    setCenter,
+    fitView,
+    zoomIn,
+    zoomOut,
+  } = useReactFlow();
 
   const handleUserInteraction = useCallback(() => {
     setHasInteracted(true);
@@ -605,6 +612,29 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     ]
   );
 
+  const handleArrangeNodes = useCallback(() => {
+    if (nodes.length <= 1) return;
+
+    const firstNode = nodes[0];
+    const startX = firstNode.position.x;
+    const startY = firstNode.position.y;
+    const horizontalGap = CHAT_NODE_WIDTH + 180;
+
+    setNodes((currentNodes) =>
+      currentNodes.map((node, index) => ({
+        ...node,
+        position: {
+          x: startX + index * horizontalGap,
+          y: startY,
+        },
+      }))
+    );
+
+    window.requestAnimationFrame(() => {
+      void fitView({ duration: 450, padding: 0.12, maxZoom: 1 });
+    });
+  }, [fitView, nodes, setNodes]);
+
   return (
     <div className="relative h-screen w-full bg-black">
       {chatQuery.isLoading && (
@@ -685,6 +715,34 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           maskColor="rgba(255,255,255,0.05)" // vewport overlay
         />
       </ReactFlow>
+
+      <div className="absolute bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-[8px] bg-[#151515] p-1 shadow-xl shadow-black/40">
+        <button
+          type="button"
+          onClick={() => void zoomOut({ duration: 180 })}
+          className="nodrag nopan flex h-9 w-9 items-center justify-center rounded-[6px] text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+          title="Zoom out"
+        >
+          <FiMinus size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={() => void zoomIn({ duration: 180 })}
+          className="nodrag nopan flex h-9 w-9 items-center justify-center rounded-[6px] text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+          title="Zoom in"
+        >
+          <FiPlus size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={handleArrangeNodes}
+          disabled={nodes.length <= 1}
+          className="nodrag nopan flex h-9 w-9 items-center justify-center rounded-[6px] text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-white/60"
+          title="Arrange nodes side by side"
+        >
+          <FiColumns size={18} />
+        </button>
+      </div>
 
       {expandedNodeId && (
         <FullscreenChat

@@ -62,7 +62,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
               <FiSidebar size={18} />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto px-2 py-4">
+          <div className="shrink-0 px-2 pt-4">
             <button
               onClick={handleNewChat}
               disabled={createChatMutation.isPending}
@@ -78,8 +78,11 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
               <FiSearch size={17} className="opacity-80" />
               Search
             </button>
-            <div className="mt-4 space-y-2">
-              <p className="mb-2 px-3 text-[13px] font-medium text-white/60">
+          </div>
+
+          <div className="mt-4 flex-1 overflow-y-auto px-2 pb-4">
+            <div className="space-y-2">
+              <p className="sticky top-0 z-10 mb-2 bg-black px-3 py-1 text-[13px] font-medium text-white/60">
                 chats
               </p>
               {chatsQuery.isLoading && (
