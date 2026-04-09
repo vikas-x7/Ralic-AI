@@ -67,10 +67,11 @@ export const chatRouter = createTRPCRouter({
 
     return ctx.db.chat.findMany({
       where: { userId },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: [{ isPinned: 'desc' }, { updatedAt: 'desc' }],
       select: {
         id: true,
         title: true,
+        isPinned: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -113,11 +114,12 @@ export const chatRouter = createTRPCRouter({
             },
           ],
         },
-        orderBy: { updatedAt: 'desc' },
+        orderBy: [{ isPinned: 'desc' }, { updatedAt: 'desc' }],
         take: 20,
         select: {
           id: true,
           title: true,
+          isPinned: true,
           updatedAt: true,
           messages: {
             where: {
@@ -213,6 +215,7 @@ export const chatRouter = createTRPCRouter({
         select: {
           id: true,
           title: true,
+          isPinned: true,
         },
       });
 
@@ -223,6 +226,7 @@ export const chatRouter = createTRPCRouter({
           select: {
             id: true,
             title: true,
+            isPinned: true,
           },
         });
       }
@@ -235,8 +239,88 @@ export const chatRouter = createTRPCRouter({
         select: {
           id: true,
           title: true,
+          isPinned: true,
         },
       });
+    }),
+
+  renameChat: protectedProcedure
+    .input(
+      z.object({
+        chatId: z.string().min(1),
+        title: z.string().trim().min(1).max(200),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = getUserId(ctx.user);
+      const chat = await ctx.db.chat.updateMany({
+        where: {
+          id: input.chatId,
+          userId,
+        },
+        data: {
+          title: input.title,
+        },
+      });
+
+      if (!chat.count) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Chat not found.',
+        });
+      }
+
+      return { ok: true };
+    }),
+
+  setChatPinned: protectedProcedure
+    .input(
+      z.object({
+        chatId: z.string().min(1),
+        isPinned: z.boolean(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = getUserId(ctx.user);
+      const chat = await ctx.db.chat.updateMany({
+        where: {
+          id: input.chatId,
+          userId,
+        },
+        data: {
+          isPinned: input.isPinned,
+        },
+      });
+
+      if (!chat.count) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Chat not found.',
+        });
+      }
+
+      return { ok: true };
+    }),
+
+  deleteChat: protectedProcedure
+    .input(z.object({ chatId: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = getUserId(ctx.user);
+      const chat = await ctx.db.chat.deleteMany({
+        where: {
+          id: input.chatId,
+          userId,
+        },
+      });
+
+      if (!chat.count) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Chat not found.',
+        });
+      }
+
+      return { ok: true };
     }),
 
   sendMessage: protectedProcedure

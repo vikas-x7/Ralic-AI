@@ -1,15 +1,25 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { FiLogOut, FiSearch, FiSidebar } from 'react-icons/fi';
+import { useEffect, useState } from 'react';
+import {
+  FiEdit2,
+  FiLogOut,
+  FiMoreHorizontal,
+  FiSearch,
+  FiSidebar,
+  FiStar,
+  FiTrash2,
+} from 'react-icons/fi';
 import { IoCreateOutline } from 'react-icons/io5';
 import { trpc } from '@/client/trpc/react';
 
 interface Chat {
   id: string;
   title: string;
+  isPinned: boolean;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 interface SidebarProps {
@@ -21,6 +31,10 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
   const pathname = usePathname();
   const activeChatId = pathname.match(/^\/dashboard\/chat\/([^/]+)/)?.[1];
   const [isOpen, setIsOpen] = useState(true);
+  const [menuChatId, setMenuChatId] = useState<string | null>(null);
+  const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<Chat | null>(null);
   const utils = trpc.useUtils();
   const chatsQuery = trpc.chat.getChats.useQuery();
   const userQuery = trpc.auth.getUser.useQuery();
@@ -30,6 +44,98 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
       router.push(`/dashboard/chat/${chat.id}`);
     },
   });
+  const renameChatMutation = trpc.chat.renameChat.useMutation({
+    onMutate: async (variables) => {
+      await utils.chat.getChats.cancel();
+      const previousChats = utils.chat.getChats.getData();
+
+      utils.chat.getChats.setData(undefined, (currentChats) =>
+        currentChats?.map((chat) =>
+          chat.id === variables.chatId
+            ? { ...chat, title: variables.title }
+            : chat
+        )
+      );
+
+      return { previousChats };
+    },
+    onError: (_error, _variables, context) => {
+      utils.chat.getChats.setData(undefined, context?.previousChats);
+    },
+    onSettled: async () => {
+      await utils.chat.getChats.invalidate();
+    },
+  });
+  const setChatPinnedMutation = trpc.chat.setChatPinned.useMutation({
+    onMutate: async (variables) => {
+      await utils.chat.getChats.cancel();
+      const previousChats = utils.chat.getChats.getData();
+
+      utils.chat.getChats.setData(undefined, (currentChats) =>
+        currentChats
+          ?.map((chat) =>
+            chat.id === variables.chatId
+              ? {
+                  ...chat,
+                  isPinned: variables.isPinned,
+                  updatedAt: new Date(),
+                }
+              : chat
+          )
+          .sort((a, b) => {
+            if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+
+            return (
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            );
+          })
+      );
+
+      return { previousChats };
+    },
+    onError: (_error, _variables, context) => {
+      utils.chat.getChats.setData(undefined, context?.previousChats);
+    },
+    onSettled: async () => {
+      await utils.chat.getChats.invalidate();
+    },
+  });
+  const deleteChatMutation = trpc.chat.deleteChat.useMutation({
+    onMutate: async (variables) => {
+      await utils.chat.getChats.cancel();
+      const previousChats = utils.chat.getChats.getData();
+
+      utils.chat.getChats.setData(undefined, (currentChats) =>
+        currentChats?.filter((chat) => chat.id !== variables.chatId)
+      );
+
+      return { previousChats };
+    },
+    onError: (_error, _variables, context) => {
+      utils.chat.getChats.setData(undefined, context?.previousChats);
+    },
+    onSuccess: (_, variables) => {
+      if (activeChatId === variables.chatId) {
+        router.push('/dashboard');
+      }
+    },
+    onSettled: async () => {
+      await utils.chat.getChats.invalidate();
+    },
+  });
+
+  useEffect(() => {
+    if (!menuChatId) return;
+
+    const handleDocumentClick = () => {
+      setMenuChatId(null);
+    };
+
+    document.addEventListener('click', handleDocumentClick);
+    return () => {
+      document.removeEventListener('click', handleDocumentClick);
+    };
+  }, [menuChatId]);
 
   const handleNewChat = () => {
     createChatMutation.mutate({ title: 'New Chat' });
@@ -37,6 +143,42 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
 
   const handleChatClick = (chatId: string) => {
     router.push(`/dashboard/chat/${chatId}`);
+  };
+
+  const startRename = (chat: Chat) => {
+    setRenamingChatId(chat.id);
+    setRenameValue(chat.title);
+    setMenuChatId(null);
+  };
+
+  const submitRename = (chatId: string) => {
+    const title = renameValue.trim();
+
+    setRenamingChatId(null);
+
+    if (!title) return;
+
+    renameChatMutation.mutate({ chatId, title });
+  };
+
+  const handleTogglePin = (chat: Chat) => {
+    setMenuChatId(null);
+    setChatPinnedMutation.mutate({
+      chatId: chat.id,
+      isPinned: !chat.isPinned,
+    });
+  };
+
+  const handleDeleteChat = (chat: Chat) => {
+    setMenuChatId(null);
+    setDeleteTarget(chat);
+  };
+
+  const confirmDeleteChat = () => {
+    if (!deleteTarget) return;
+
+    deleteChatMutation.mutate({ chatId: deleteTarget.id });
+    setDeleteTarget(null);
   };
 
   return (
@@ -81,7 +223,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
           </div>
 
           <div className="mt-4 flex-1 overflow-y-auto px-2 pb-4">
-            <div className="space-y-2">
+            <div className="space-y">
               <p className="sticky top-0 z-10 mb-2 bg-black px-3 py-1 text-[13px] font-medium text-white/60">
                 chats
               </p>
@@ -93,20 +235,103 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
               )}
               {chatsQuery.data?.map((chat: Chat) => {
                 const isActive = activeChatId === chat.id;
+                const isRenaming = renamingChatId === chat.id;
+                const isMenuOpen = menuChatId === chat.id;
 
                 return (
-                  <button
+                  <div
                     key={chat.id}
-                    onClick={() => handleChatClick(chat.id)}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`flex w-full items-center rounded-[3px] px-3 py-1 text-left text-sm transition-colors ${
+                    className={`group relative flex w-full items-center rounded-[3px] px-2 py-1 text-sm transition-colors ${
                       isActive
                         ? 'bg-[#242424] text-white'
                         : 'text-gray-300 hover:bg-[#1e1e1e] hover:text-white'
                     }`}
                   >
-                    <span className="truncate">{chat.title}</span>
-                  </button>
+                    {isRenaming ? (
+                      <input
+                        value={renameValue}
+                        onChange={(event) => setRenameValue(event.target.value)}
+                        onBlur={() => submitRename(chat.id)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault();
+                            submitRename(chat.id);
+                          }
+
+                          if (event.key === 'Escape') {
+                            setRenamingChatId(null);
+                          }
+                        }}
+                        autoFocus
+                        className="min-w-0 flex-1 bg-[#303030] px-2 py-1 text-sm text-white outline-none"
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleChatClick(chat.id)}
+                        className="flex min-w-0 flex-1 items-center gap-1.5 px-1 py-1 text-left"
+                      >
+                        {chat.isPinned && (
+                          <FiStar
+                            size={12}
+                            className="shrink-0 fill-white/50 text-white/50"
+                          />
+                        )}
+                        <span className="truncate">{chat.title}</span>
+                      </button>
+                    )}
+
+                    {!isRenaming && (
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setMenuChatId(isMenuOpen ? null : chat.id);
+                        }}
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[4px] text-white/40 transition-colors hover:bg-white/10 hover:text-white ${
+                          isMenuOpen
+                            ? 'opacity-100'
+                            : 'opacity-0 group-hover:opacity-100'
+                        }`}
+                        title="Chat options"
+                      >
+                        <FiMoreHorizontal size={16} />
+                      </button>
+                    )}
+
+                    {isMenuOpen && (
+                      <div
+                        onClick={(event) => event.stopPropagation()}
+                        className="absolute top-8 right-1 z-30 w-36 rounded-[7px] bg-[#202020] p-1 shadow-xl shadow-black/50"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => startRename(chat)}
+                          className="flex w-full items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-white/75 hover:bg-white/10 hover:text-white"
+                        >
+                          <FiEdit2 size={14} />
+                          Rename
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePin(chat)}
+                          className="flex w-full items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-white/75 hover:bg-white/10 hover:text-white"
+                        >
+                          <FiStar size={14} />
+                          {chat.isPinned ? 'Unpin' : 'Pin'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteChat(chat)}
+                          className="flex w-full items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200"
+                        >
+                          <FiTrash2 size={14} />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -153,6 +378,34 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
         >
           <FiSidebar size={20} />
         </button>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-[360px] rounded-[10px] bg-[#151515] p-4 text-white shadow-2xl shadow-black/60">
+            <h2 className="text-[15px] font-medium">Delete chat?</h2>
+            <p className="mt-2 text-sm leading-6 text-white/50">
+              This will permanently delete &quot;{deleteTarget.title}&quot;.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-[6px] px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteChat}
+                disabled={deleteChatMutation.isPending}
+                className="rounded-[6px] bg-red-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {deleteChatMutation.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

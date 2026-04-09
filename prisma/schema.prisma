@@ -26,6 +26,7 @@ model Chat {
   title     String   @default("New Chat")
   userId    String
   canvas    Json?
+  isPinned  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -33,6 +34,7 @@ model Chat {
   messages ChatMessage[]
 
   @@index([userId, updatedAt])
+  @@index([userId, isPinned, updatedAt])
 }
 
 model ChatMessage {

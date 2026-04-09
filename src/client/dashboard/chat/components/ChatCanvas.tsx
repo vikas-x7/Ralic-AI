@@ -30,7 +30,6 @@ import { trpc } from '@/client/trpc/react';
 
 import ChatNode, {
   CHAT_NODE_HANDLE_IDS,
-  CHAT_NODE_HANDLE_TOP,
   CHAT_NODE_WIDTH,
   type ChatNodeData,
 } from './ChatNode';
@@ -48,6 +47,9 @@ const initialNodes: Node<ChatNodeData>[] = [
     data: { customId: 'root' },
   },
 ];
+
+const NEW_NODE_HORIZONTAL_GAP = 160;
+const NEW_NODE_VERTICAL_GAP = 60;
 
 type TextSelectionAction = {
   sourceNodeId: string;
@@ -128,15 +130,8 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   const setNodesRef = useRef<Dispatch<
     SetStateAction<Node<ChatNodeData>[]>
   > | null>(null);
-  const {
-    screenToFlowPosition,
-    getZoom,
-    getNode,
-    setCenter,
-    fitView,
-    zoomIn,
-    zoomOut,
-  } = useReactFlow();
+  const { getZoom, getNode, setCenter, fitView, zoomIn, zoomOut } =
+    useReactFlow();
 
   const handleUserInteraction = useCallback(() => {
     setHasInteracted(true);
@@ -187,6 +182,69 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       });
 
       void (async () => {
+        let targetContent = '';
+        let displayedContent = '';
+        let animationFrame: number | null = null;
+        let resolveDisplayFlush: (() => void) | null = null;
+
+        const updatePendingMessage = (content: string) => {
+          setNodeMessages((prev) => ({
+            ...prev,
+            [nodeId]: (prev[nodeId] || []).map((msg) =>
+              msg.id === pendingMessage.id
+                ? {
+                    ...msg,
+                    content,
+                  }
+                : msg
+            ),
+          }));
+        };
+
+        const animateStream = () => {
+          const remaining = targetContent.length - displayedContent.length;
+
+          if (remaining > 0) {
+            const step = Math.max(1, Math.ceil(remaining / 8));
+            displayedContent = targetContent.slice(
+              0,
+              displayedContent.length + step
+            );
+            updatePendingMessage(displayedContent);
+          }
+
+          if (displayedContent.length < targetContent.length) {
+            animationFrame = window.requestAnimationFrame(animateStream);
+            return;
+          }
+
+          animationFrame = null;
+          resolveDisplayFlush?.();
+          resolveDisplayFlush = null;
+        };
+
+        const pushStreamContent = (content: string) => {
+          targetContent = content;
+
+          if (animationFrame === null) {
+            animationFrame = window.requestAnimationFrame(animateStream);
+          }
+        };
+
+        const waitForStreamDisplay = () => {
+          if (displayedContent.length >= targetContent.length) {
+            return Promise.resolve();
+          }
+
+          return new Promise<void>((resolve) => {
+            resolveDisplayFlush = resolve;
+
+            if (animationFrame === null) {
+              animationFrame = window.requestAnimationFrame(animateStream);
+            }
+          });
+        };
+
         try {
           const response = await fetch('/api/chat/stream', {
             method: 'POST',
@@ -219,28 +277,20 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
 
             const chunk = decoder.decode(value, { stream: true });
             streamedContent += chunk;
-
-            setNodeMessages((prev) => ({
-              ...prev,
-              [nodeId]: (prev[nodeId] || []).map((msg) =>
-                msg.id === pendingMessage.id
-                  ? {
-                      ...msg,
-                      content: streamedContent,
-                    }
-                  : msg
-              ),
-            }));
+            pushStreamContent(streamedContent);
           }
 
           const trailingChunk = decoder.decode();
 
           if (trailingChunk) {
             streamedContent += trailingChunk;
+            pushStreamContent(streamedContent);
           }
 
           const finalContent =
             streamedContent.trim() || 'No response returned from the model.';
+          pushStreamContent(finalContent);
+          await waitForStreamDisplay();
 
           setNodeMessages((prev) => ({
             ...prev,
@@ -258,6 +308,10 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           void utils.chat.getChats.invalidate();
           void utils.chat.getChat.invalidate({ chatId });
         } catch (error) {
+          if (animationFrame !== null) {
+            window.cancelAnimationFrame(animationFrame);
+          }
+
           setNodeMessages((prev) => ({
             ...prev,
             [nodeId]: (prev[nodeId] || []).map((msg) =>
@@ -420,8 +474,8 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     const sourceNodeHeight = sourceNode?.measured?.height ?? 180;
     const sourcePosition = sourceNode?.position ?? { x: 0, y: 0 };
     const newNodePosition = {
-      x: sourcePosition.x + sourceNodeWidth + 160,
-      y: sourcePosition.y + 40,
+      x: sourcePosition.x + sourceNodeWidth + NEW_NODE_HORIZONTAL_GAP,
+      y: sourcePosition.y + sourceNodeHeight + NEW_NODE_VERTICAL_GAP,
     };
 
     const newNode: Node<ChatNodeData> = {
@@ -458,8 +512,16 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     );
 
     void setCenter(
-      sourcePosition.x + sourceNodeWidth + 80,
-      sourcePosition.y + sourceNodeHeight / 2,
+      (sourcePosition.x +
+        sourceNodeWidth / 2 +
+        newNodePosition.x +
+        CHAT_NODE_WIDTH / 2) /
+        2,
+      (sourcePosition.y +
+        sourceNodeHeight / 2 +
+        newNodePosition.y +
+        sourceNodeHeight / 2) /
+        2,
       {
         duration: 350,
         ease: (t) => 1 - Math.pow(1 - t, 3),
@@ -517,7 +579,10 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   );
 
   const onConnectEnd = useCallback(
-    (event: MouseEvent | TouchEvent, connectionState: FinalConnectionState) => {
+    (
+      _event: MouseEvent | TouchEvent,
+      connectionState: FinalConnectionState
+    ) => {
       if (
         connectionState.isValid ||
         !connectionState.fromNode ||
@@ -529,15 +594,6 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
 
       const id = crypto.randomUUID();
 
-      const clientX =
-        'clientX' in event ? event.clientX : event.changedTouches?.[0]?.clientX;
-      const clientY =
-        'clientY' in event ? event.clientY : event.changedTouches?.[0]?.clientY;
-
-      if (clientX === undefined || clientY === undefined) return;
-
-      const dropPosition = screenToFlowPosition({ x: clientX, y: clientY });
-
       const sourceNodeId = connectionState.fromNode.id;
       const sourceHandleId = connectionState.fromHandle?.id || null;
 
@@ -546,16 +602,22 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           ? CHAT_NODE_HANDLE_IDS.right
           : CHAT_NODE_HANDLE_IDS.left;
 
+      const sourceNodePosition =
+        connectionState.fromNode.internals.positionAbsolute;
+      const sourceNodeWidth =
+        connectionState.fromNode.measured.width ?? CHAT_NODE_WIDTH;
+      const sourceNodeHeight = connectionState.fromNode.measured.height ?? 180;
+      const newNodePosition = {
+        x:
+          targetHandle === CHAT_NODE_HANDLE_IDS.right
+            ? sourceNodePosition.x - CHAT_NODE_WIDTH - NEW_NODE_HORIZONTAL_GAP
+            : sourceNodePosition.x + sourceNodeWidth + NEW_NODE_HORIZONTAL_GAP,
+        y: sourceNodePosition.y + sourceNodeHeight + NEW_NODE_VERTICAL_GAP,
+      };
       const newNode: Node<ChatNodeData> = {
         id,
         type: 'chatNode',
-        position: {
-          x:
-            targetHandle === CHAT_NODE_HANDLE_IDS.right
-              ? dropPosition.x - CHAT_NODE_WIDTH
-              : dropPosition.x,
-          y: dropPosition.y - CHAT_NODE_HANDLE_TOP,
-        },
+        position: newNodePosition,
         data: {
           customId: id,
           messages: [],
@@ -565,11 +627,6 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           onExpand: handleExpand,
         },
       };
-      const sourceNodePosition =
-        connectionState.fromNode.internals.positionAbsolute;
-      const sourceNodeWidth =
-        connectionState.fromNode.measured.width ?? CHAT_NODE_WIDTH;
-      const sourceNodeHeight = connectionState.fromNode.measured.height ?? 180;
       const sourceNodeCenterX = sourceNodePosition.x + sourceNodeWidth / 2;
       const sourceNodeCenterY = sourceNodePosition.y + sourceNodeHeight / 2;
       const newNodeCenterX = newNode.position.x + CHAT_NODE_WIDTH / 2;
@@ -605,7 +662,6 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       handleResponseHeightChange,
       handleSend,
       handleExpand,
-      screenToFlowPosition,
       setCenter,
       setNodes,
       setEdges,
