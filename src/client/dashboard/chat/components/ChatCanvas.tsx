@@ -50,6 +50,9 @@ const initialNodes: Node<ChatNodeData>[] = [
 
 const NEW_NODE_HORIZONTAL_GAP = 160;
 const NEW_NODE_VERTICAL_GAP = 60;
+const STREAM_MIN_REVEAL_RATE = 70;
+const STREAM_MAX_REVEAL_RATE = 520;
+const STREAM_FRAME_CAP_MS = 80;
 
 type TextSelectionAction = {
   sourceNodeId: string;
@@ -111,6 +114,14 @@ function isPersistedCanvas(value: unknown): value is PersistedCanvas {
   const canvas = value as PersistedCanvas;
 
   return Array.isArray(canvas.nodes) && Array.isArray(canvas.edges);
+}
+
+function getStreamRevealRate(remainingCharacters: number) {
+  if (remainingCharacters > 700) return STREAM_MAX_REVEAL_RATE;
+  if (remainingCharacters > 250) return 360;
+  if (remainingCharacters > 80) return 220;
+
+  return STREAM_MIN_REVEAL_RATE;
 }
 
 function ChatCanvasInner({ chatId }: { chatId: string }) {
@@ -186,6 +197,8 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
         let displayedContent = '';
         let animationFrame: number | null = null;
         let resolveDisplayFlush: (() => void) | null = null;
+        let lastFrameTime = 0;
+        let revealBudget = 0;
 
         const updatePendingMessage = (content: string) => {
           setNodeMessages((prev) => ({
@@ -201,11 +214,23 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           }));
         };
 
-        const animateStream = () => {
+        const animateStream = (frameTime: number) => {
           const remaining = targetContent.length - displayedContent.length;
 
           if (remaining > 0) {
-            const step = Math.max(1, Math.ceil(remaining / 8));
+            const elapsedTime = lastFrameTime
+              ? Math.min(frameTime - lastFrameTime, STREAM_FRAME_CAP_MS)
+              : 16;
+            const revealRate = getStreamRevealRate(remaining);
+
+            lastFrameTime = frameTime;
+            revealBudget += (revealRate * elapsedTime) / 1000;
+
+            const step = Math.min(
+              remaining,
+              Math.max(1, Math.floor(revealBudget))
+            );
+            revealBudget = Math.max(0, revealBudget - step);
             displayedContent = targetContent.slice(
               0,
               displayedContent.length + step
@@ -219,6 +244,8 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           }
 
           animationFrame = null;
+          lastFrameTime = 0;
+          revealBudget = 0;
           resolveDisplayFlush?.();
           resolveDisplayFlush = null;
         };

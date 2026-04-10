@@ -19,6 +19,11 @@ import { LiaLinkSolid } from 'react-icons/lia';
 export type ChatNodeData = {
   customId: string;
   initialInput?: string;
+  selectionAnchors?: Array<{
+    id: string;
+    x: number;
+    y: number;
+  }>;
   messages?: ChatMessage[];
   onInteract?: () => void;
   onResponseHeightChange?: (nodeId: string, delta: number) => void;
@@ -57,6 +62,7 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
     customId,
     initialInput,
     messages = [],
+    selectionAnchors = [],
     onInteract,
     onResponseHeightChange,
     onSend,
@@ -117,7 +123,7 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
   };
 
   return (
-    <div className="group w-[750px] rounded-[8px] border border-[#303030] bg-[#121212] shadow-xl transition-all">
+    <div className="group relative w-[750px] rounded-[8px] border border-[#303030] bg-[#121212] shadow-xl transition-all">
       <div className="flex items-center justify-between border-b border-[#1f1f1f] p-3 py-4" />
 
       {messages.length > 0 && (
@@ -135,12 +141,20 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
                 <span className="mb-1 block text-[19px] font-medium text-white/30"></span>
               )}
               {msg.status === 'pending' && !msg.content ? (
-                'Thinking...'
+                <span className="inline-flex items-center text-white/45">
+                  Thinking
+                  <span className="stream-thinking-dots" />
+                </span>
               ) : (
-                <MessageContent
-                  content={msg.content}
-                  isUser={msg.role === 'user'}
-                />
+                <>
+                  <MessageContent
+                    content={msg.content}
+                    isUser={msg.role === 'user'}
+                  />
+                  {msg.status === 'pending' && (
+                    <span className="stream-cursor" aria-hidden="true" />
+                  )}
+                </>
               )}
             </div>
           ))}
@@ -231,6 +245,24 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
           }}
         />
       </div>
+
+      {selectionAnchors.map((anchor) => (
+        <Handle
+          key={anchor.id}
+          type="source"
+          id={anchor.id}
+          position={Position.Right}
+          className="pointer-events-none opacity-0"
+          style={{
+            width: 1,
+            height: 1,
+            border: 0,
+            background: 'transparent',
+            left: anchor.x,
+            top: anchor.y,
+          }}
+        />
+      ))}
     </div>
   );
 }

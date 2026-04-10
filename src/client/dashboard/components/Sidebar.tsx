@@ -208,14 +208,14 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
             <button
               onClick={handleNewChat}
               disabled={createChatMutation.isPending}
-              className="flex w-full items-center gap-2 rounded-[3px] bg-white/5 px-3 py-2 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full cursor-pointer items-center gap-2 rounded-[3px] bg-white/5 px-3 py-2 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <IoCreateOutline size={18} className="mb-0.5 opacity-80" />
               {createChatMutation.isPending ? 'Creating...' : 'New chat'}
             </button>
             <button
               onClick={onOpenSearch}
-              className="mt-2 flex w-full items-center gap-2 rounded-[3px] px-3 py-2 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e] hover:text-white"
+              className="mt-2 flex w-full cursor-pointer items-center gap-2 rounded-[3px] px-3 py-2 text-left text-sm text-gray-200 transition-colors hover:bg-[#1e1e1e] hover:text-white"
             >
               <FiSearch size={17} className="opacity-80" />
               Search
@@ -242,7 +242,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
                   <div
                     key={chat.id}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`group relative flex w-full items-center rounded-[3px] px-2 py-1 text-sm transition-colors ${
+                    className={`group relative flex w-full cursor-pointer items-center rounded-[2px] px-2 py-1 text-sm transition-colors ${
                       isActive
                         ? 'bg-[#242424] text-white'
                         : 'text-gray-300 hover:bg-[#1e1e1e] hover:text-white'
@@ -270,7 +270,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
                       <button
                         type="button"
                         onClick={() => handleChatClick(chat.id)}
-                        className="flex min-w-0 flex-1 items-center gap-1.5 px-1 py-1 text-left"
+                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 px-1 py-1 text-left"
                       >
                         {chat.isPinned && (
                           <FiStar
@@ -289,7 +289,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
                           event.stopPropagation();
                           setMenuChatId(isMenuOpen ? null : chat.id);
                         }}
-                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[4px] text-white/40 transition-colors hover:bg-white/10 hover:text-white ${
+                        className={`flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-[4px] text-white/40 transition-colors hover:bg-white/10 hover:text-white ${
                           isMenuOpen
                             ? 'opacity-100'
                             : 'opacity-0 group-hover:opacity-100'
@@ -308,7 +308,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
                         <button
                           type="button"
                           onClick={() => startRename(chat)}
-                          className="flex w-full items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-white/75 hover:bg-white/10 hover:text-white"
+                          className="flex w-full cursor-pointer items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-white/75 hover:bg-white/10 hover:text-white"
                         >
                           <FiEdit2 size={14} />
                           Rename
@@ -316,7 +316,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
                         <button
                           type="button"
                           onClick={() => handleTogglePin(chat)}
-                          className="flex w-full items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-white/75 hover:bg-white/10 hover:text-white"
+                          className="flex w-full cursor-pointer items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-white/75 hover:bg-white/10 hover:text-white"
                         >
                           <FiStar size={14} />
                           {chat.isPinned ? 'Unpin' : 'Pin'}
@@ -324,7 +324,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
                         <button
                           type="button"
                           onClick={() => handleDeleteChat(chat)}
-                          className="flex w-full items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200"
+                          className="flex w-full cursor-pointer items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200"
                         >
                           <FiTrash2 size={14} />
                           Delete
