@@ -25,7 +25,7 @@ import {
   BackgroundVariant,
   MiniMap,
 } from '@xyflow/react';
-import { FiColumns, FiMinus, FiPlus } from 'react-icons/fi';
+import { FiColumns, FiCrosshair, FiMinus, FiPlus } from 'react-icons/fi';
 import { trpc } from '@/client/trpc/react';
 
 import ChatNode, {
@@ -53,6 +53,7 @@ const NEW_NODE_VERTICAL_GAP = 60;
 const STREAM_MIN_REVEAL_RATE = 70;
 const STREAM_MAX_REVEAL_RATE = 520;
 const STREAM_FRAME_CAP_MS = 80;
+const CHAT_INPUT_FOCUS_ZOOM = 0.95;
 
 type TextSelectionAction = {
   sourceNodeId: string;
@@ -129,6 +130,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   const chatQuery = trpc.chat.getChat.useQuery({ chatId });
   const saveCanvasMutation = trpc.chat.saveCanvas.useMutation();
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [activeNodeId, setActiveNodeId] = useState(initialNodes[0].id);
   const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null);
   const [textSelectionAction, setTextSelectionAction] =
     useState<TextSelectionAction | null>(null);
@@ -148,29 +150,16 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     setHasInteracted(true);
   }, []);
 
-  const handleResponseHeightChange = useCallback(
-    (nodeId: string, delta: number) => {
-      if (!delta) return;
+  const handleNodeFocus = useCallback((nodeId: string) => {
+    setActiveNodeId(nodeId);
+  }, []);
 
-      setNodesRef.current?.((currentNodes) =>
-        currentNodes.map((node) =>
-          node.id === nodeId
-            ? {
-                ...node,
-                position: {
-                  ...node.position,
-                  y: node.position.y - delta,
-                },
-              }
-            : node
-        )
-      );
-    },
-    []
-  );
+  const handleResponseHeightChange = useCallback(() => {}, []);
 
   const handleSend = useCallback(
     (nodeId: string, message: string) => {
+      setActiveNodeId(nodeId);
+
       const userMessage: ChatMessage = { role: 'user', content: message };
       const pendingMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -361,6 +350,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   );
 
   const handleExpand = useCallback((nodeId: string) => {
+    setActiveNodeId(nodeId);
     setExpandedNodeId(nodeId);
   }, []);
 
@@ -377,6 +367,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
         return;
       }
 
+      setActiveNodeId(nodeId);
       setTextSelectionAction({
         sourceNodeId: nodeId,
         text,
@@ -398,6 +389,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           onResponseHeightChange: handleResponseHeightChange,
           onSend: handleSend,
           onExpand: handleExpand,
+          onFocusNode: handleNodeFocus,
           onTextSelection: handleTextSelection,
         },
       })),
@@ -406,6 +398,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       handleResponseHeightChange,
       handleSend,
       handleExpand,
+      handleNodeFocus,
       handleTextSelection,
     ]
   );
@@ -454,6 +447,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
 
     setNodeMessages(messagesByNode);
     setHasInteracted(Object.keys(messagesByNode).length > 0);
+    setActiveNodeId(nextNodes[0]?.id || initialNodes[0].id);
     setNodes(syncNodeInteractionHandler(nextNodes, messagesByNode));
     setEdges(nextEdges);
 
@@ -522,6 +516,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     };
 
     setHasInteracted(true);
+    setActiveNodeId(id);
     setExpandedNodeId(null);
     setTextSelectionAction(null);
     window.getSelection()?.removeAllRanges();
@@ -660,6 +655,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       const newNodeCenterY = newNode.position.y + sourceNodeHeight / 2;
 
       setHasInteracted(true);
+      setActiveNodeId(id);
       setNodes((nds) => nds.concat(newNode));
 
       setEdges((eds) =>
@@ -718,6 +714,31 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     });
   }, [fitView, nodes, setNodes]);
 
+  const handleFocusActiveNode = useCallback(() => {
+    const targetNodeId =
+      nodes.find((node) => node.id === activeNodeId)?.id || nodes[0]?.id;
+
+    if (!targetNodeId) return;
+
+    const fallbackNode = nodes.find((node) => node.id === targetNodeId);
+    const targetNode = getNode(targetNodeId) || fallbackNode;
+    const nodePosition = targetNode?.position || fallbackNode?.position;
+
+    if (!nodePosition) return;
+
+    const nodeWidth = targetNode?.measured?.width ?? CHAT_NODE_WIDTH;
+    const nodeHeight = targetNode?.measured?.height ?? 220;
+    const inputCenterX = nodePosition.x + nodeWidth / 2;
+    const inputCenterY = nodePosition.y + Math.max(90, nodeHeight - 72);
+
+    setActiveNodeId(targetNodeId);
+    void setCenter(inputCenterX, inputCenterY, {
+      duration: 450,
+      zoom: CHAT_INPUT_FOCUS_ZOOM,
+      ease: (t) => 1 - Math.pow(1 - t, 3),
+    });
+  }, [activeNodeId, getNode, nodes, setCenter]);
+
   return (
     <div className="relative h-screen w-full bg-black">
       {chatQuery.isLoading && (
@@ -759,6 +780,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        onNodeClick={(_, node) => handleNodeFocus(node.id)}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnectEnd={onConnectEnd}
@@ -824,6 +846,15 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           title="Arrange nodes side by side"
         >
           <FiColumns size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={handleFocusActiveNode}
+          disabled={!nodes.length}
+          className="nodrag nopan flex h-9 w-9 items-center justify-center rounded-[6px] text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-white/60"
+          title="Focus current node"
+        >
+          <FiCrosshair size={18} />
         </button>
       </div>
 

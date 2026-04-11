@@ -29,6 +29,7 @@ export type ChatNodeData = {
   onResponseHeightChange?: (nodeId: string, delta: number) => void;
   onSend?: (nodeId: string, message: string) => void;
   onExpand?: (nodeId: string) => void;
+  onFocusNode?: (nodeId: string) => void;
   onTextSelection?: (
     nodeId: string,
     selectedText: string,
@@ -67,6 +68,7 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
     onResponseHeightChange,
     onSend,
     onExpand,
+    onFocusNode,
     onTextSelection,
   } = data;
   const [input, setInput] = useState(() => initialInput ?? '');
@@ -179,6 +181,7 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
             }}
             placeholder="Ask a follow-up"
             className={`${CHAT_TEXT_INTERACTION_CLASS} w-full resize-none overflow-y-hidden bg-transparent py-1 text-[16px] leading-6 text-gray-200 placeholder-white/40 outline-none`}
+            onFocus={() => onFocusNode?.(customId)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();

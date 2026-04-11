@@ -173,7 +173,7 @@ export default function FullscreenChat({
 
                 <button
                   onClick={onClose}
-                  className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] transition-colors hover:bg-[#303030] hover:text-white"
+                  className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] transition-colors hover:bg-[#303030] hover:text-white"
                   title="Collapse to node view"
                 >
                   <BsArrowsAngleContract size={14} />
