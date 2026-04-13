@@ -193,7 +193,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
             <div className="flex items-center text-white">
               <img src="/images/logo.png" alt="" className="w-10" />
               <h1 className="mt-0.5 -ml-1 text-[17px] font-medium tracking-tight">
-                Relic ai
+                Relic AI
               </h1>
             </div>
             <button
@@ -233,107 +233,111 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
               {chatsQuery.data?.length === 0 && (
                 <p className="px-3 py-2 text-sm text-white/35">No chats yet</p>
               )}
-              {chatsQuery.data?.map((chat: Chat) => {
-                const isActive = activeChatId === chat.id;
-                const isRenaming = renamingChatId === chat.id;
-                const isMenuOpen = menuChatId === chat.id;
+              {chatsQuery.data
+                ?.filter((chat) => chat.title.trim() !== 'New Chat')
+                .map((chat: Chat) => {
+                  const isActive = activeChatId === chat.id;
+                  const isRenaming = renamingChatId === chat.id;
+                  const isMenuOpen = menuChatId === chat.id;
 
-                return (
-                  <div
-                    key={chat.id}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={`group relative flex w-full cursor-pointer items-center rounded-[2px] px-2 py-1 text-sm transition-colors ${
-                      isActive
-                        ? 'bg-[#242424] text-white'
-                        : 'text-gray-300 hover:bg-[#1e1e1e] hover:text-white'
-                    }`}
-                  >
-                    {isRenaming ? (
-                      <input
-                        value={renameValue}
-                        onChange={(event) => setRenameValue(event.target.value)}
-                        onBlur={() => submitRename(chat.id)}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter') {
-                            event.preventDefault();
-                            submitRename(chat.id);
+                  return (
+                    <div
+                      key={chat.id}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`group relative flex w-full cursor-pointer items-center rounded-[2px] px-2 py-1 text-sm transition-colors ${
+                        isActive
+                          ? 'bg-[#242424] text-white'
+                          : 'text-gray-300 hover:bg-[#1e1e1e] hover:text-white'
+                      }`}
+                    >
+                      {isRenaming ? (
+                        <input
+                          value={renameValue}
+                          onChange={(event) =>
+                            setRenameValue(event.target.value)
                           }
+                          onBlur={() => submitRename(chat.id)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                              event.preventDefault();
+                              submitRename(chat.id);
+                            }
 
-                          if (event.key === 'Escape') {
-                            setRenamingChatId(null);
-                          }
-                        }}
-                        autoFocus
-                        className="min-w-0 flex-1 bg-[#303030] px-2 py-1 text-sm text-white outline-none"
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => handleChatClick(chat.id)}
-                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 px-1 py-1 text-left"
-                      >
-                        {chat.isPinned && (
-                          <FiStar
-                            size={12}
-                            className="shrink-0 fill-white/50 text-white/50"
-                          />
-                        )}
-                        <span className="truncate">{chat.title}</span>
-                      </button>
-                    )}
-
-                    {!isRenaming && (
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setMenuChatId(isMenuOpen ? null : chat.id);
-                        }}
-                        className={`flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-[4px] text-white/40 transition-colors hover:bg-white/10 hover:text-white ${
-                          isMenuOpen
-                            ? 'opacity-100'
-                            : 'opacity-0 group-hover:opacity-100'
-                        }`}
-                        title="Chat options"
-                      >
-                        <FiMoreHorizontal size={16} />
-                      </button>
-                    )}
-
-                    {isMenuOpen && (
-                      <div
-                        onClick={(event) => event.stopPropagation()}
-                        className="absolute top-8 right-1 z-30 w-36 rounded-[7px] bg-[#202020] p-1 shadow-xl shadow-black/50"
-                      >
+                            if (event.key === 'Escape') {
+                              setRenamingChatId(null);
+                            }
+                          }}
+                          autoFocus
+                          className="min-w-0 flex-1 px-2 py-1 text-sm text-white outline-none"
+                        />
+                      ) : (
                         <button
                           type="button"
-                          onClick={() => startRename(chat)}
-                          className="flex w-full cursor-pointer items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-white/75 hover:bg-white/10 hover:text-white"
+                          onClick={() => handleChatClick(chat.id)}
+                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 px-1 py-1 text-left"
                         >
-                          <FiEdit2 size={14} />
-                          Rename
+                          {chat.isPinned && (
+                            <FiStar
+                              size={12}
+                              className="shrink-0 fill-white/50 text-white/50"
+                            />
+                          )}
+                          <span className="truncate">{chat.title}</span>
                         </button>
+                      )}
+
+                      {!isRenaming && (
                         <button
                           type="button"
-                          onClick={() => handleTogglePin(chat)}
-                          className="flex w-full cursor-pointer items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-white/75 hover:bg-white/10 hover:text-white"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setMenuChatId(isMenuOpen ? null : chat.id);
+                          }}
+                          className={`flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-[4px] text-white/40 transition-colors hover:bg-white/10 hover:text-white ${
+                            isMenuOpen
+                              ? 'opacity-100'
+                              : 'opacity-0 group-hover:opacity-100'
+                          }`}
+                          title="Chat options"
                         >
-                          <FiStar size={14} />
-                          {chat.isPinned ? 'Unpin' : 'Pin'}
+                          <FiMoreHorizontal size={16} />
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteChat(chat)}
-                          className="flex w-full cursor-pointer items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200"
+                      )}
+
+                      {isMenuOpen && (
+                        <div
+                          onClick={(event) => event.stopPropagation()}
+                          className="absolute top-8 right-1 z-30 w-36 rounded-[7px] bg-[#202020] p-1 shadow-xl shadow-black/50"
                         >
-                          <FiTrash2 size={14} />
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                          <button
+                            type="button"
+                            onClick={() => startRename(chat)}
+                            className="flex w-full cursor-pointer items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-white/75 hover:bg-white/10 hover:text-white"
+                          >
+                            <FiEdit2 size={14} />
+                            Rename
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePin(chat)}
+                            className="flex w-full cursor-pointer items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-white/75 hover:bg-white/10 hover:text-white"
+                          >
+                            <FiStar size={14} />
+                            {chat.isPinned ? 'Unpin' : 'Pin'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteChat(chat)}
+                            className="flex w-full cursor-pointer items-center gap-2 rounded-[5px] px-2.5 py-2 text-left text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200"
+                          >
+                            <FiTrash2 size={14} />
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           </div>
           <div className="flex items-center justify-between border-t border-white/10 px-2 py-1">

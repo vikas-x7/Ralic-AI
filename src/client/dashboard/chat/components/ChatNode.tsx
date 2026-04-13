@@ -8,7 +8,17 @@ import {
   useRef,
   useState,
 } from 'react';
-import { FiChevronDown, FiPlus, FiMic } from 'react-icons/fi';
+import {
+  FiChevronDown,
+  FiPlus,
+  FiMic,
+  FiTrash2,
+  FiCopy,
+  FiThumbsUp,
+  FiThumbsDown,
+  FiRefreshCw,
+  FiCheck,
+} from 'react-icons/fi';
 import { IoMdArrowUp } from 'react-icons/io';
 import { BsArrowsFullscreen, BsFileMusic } from 'react-icons/bs';
 import type { ChatMessage } from './FullscreenChat';
@@ -30,6 +40,7 @@ export type ChatNodeData = {
   onSend?: (nodeId: string, message: string) => void;
   onExpand?: (nodeId: string) => void;
   onFocusNode?: (nodeId: string) => void;
+  onRequestDelete?: (nodeId: string) => void;
   onTextSelection?: (
     nodeId: string,
     selectedText: string,
@@ -69,12 +80,41 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
     onSend,
     onExpand,
     onFocusNode,
+    onRequestDelete,
     onTextSelection,
   } = data;
   const [input, setInput] = useState(() => initialInput ?? '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const responseSectionRef = useRef<HTMLDivElement>(null);
   const previousResponseHeightRef = useRef(0);
+
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<
+    Partial<Record<number, 'like' | 'dislike'>>
+  >({});
+
+  const handleCopy = (content: string, index: number) => {
+    navigator.clipboard.writeText(content);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const handleFeedback = (index: number, type: 'like' | 'dislike') => {
+    setFeedback((prev) => ({
+      ...prev,
+      [index]: prev[index] === type ? undefined : type,
+    }));
+  };
+
+  const handleRetry = (index: number) => {
+    const prevMsg = messages
+      .slice(0, index)
+      .reverse()
+      .find((m) => m.role === 'user');
+    if (prevMsg && onSend) {
+      onSend(customId, prevMsg.content);
+    }
+  };
 
   const resizeTextarea = useCallback((textarea: HTMLTextAreaElement) => {
     textarea.style.height = '0px';
@@ -156,6 +196,45 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
                   {msg.status === 'pending' && (
                     <span className="stream-cursor" aria-hidden="true" />
                   )}
+
+                  {msg.role === 'assistant' &&
+                    msg.status !== 'pending' &&
+                    msg.content && (
+                      <div className="mt-2 flex items-center text-white/40">
+                        <button
+                          onClick={() => handleCopy(msg.content, i)}
+                          className="flex h-7 w-7 items-center justify-center rounded-[5px] transition-all duration-200 hover:bg-white/10 hover:text-white active:scale-75"
+                          title="Copy"
+                        >
+                          {copiedIndex === i ? (
+                            <FiCheck size={14} />
+                          ) : (
+                            <FiCopy size={14} />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleFeedback(i, 'like')}
+                          className={`flex h-7 w-7 items-center justify-center rounded-[5px] transition-all duration-200 hover:bg-white/10 hover:text-white active:scale-75 ${feedback[i] === 'like' ? 'scale-110 bg-white/10 text-white' : ''}`}
+                          title="Like"
+                        >
+                          <FiThumbsUp size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleFeedback(i, 'dislike')}
+                          className={`flex h-7 w-7 items-center justify-center rounded-[5px] transition-all duration-200 hover:bg-white/10 hover:text-white active:scale-75 ${feedback[i] === 'dislike' ? 'scale-110 bg-white/10 text-white' : ''}`}
+                          title="Dislike"
+                        >
+                          <FiThumbsDown size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleRetry(i)}
+                          className="flex h-7 w-7 items-center justify-center rounded-[5px] transition-all duration-200 hover:bg-white/10 hover:text-white active:scale-75"
+                          title="Retry"
+                        >
+                          <FiRefreshCw size={14} />
+                        </button>
+                      </div>
+                    )}
                 </>
               )}
             </div>
@@ -211,6 +290,14 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
                 title="Open fullscreen chat"
               >
                 <BsArrowsFullscreen size={14} />
+              </button>
+
+              <button
+                onClick={() => onRequestDelete?.(customId)}
+                className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] text-white/60 transition-colors hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-200"
+                title="Delete node"
+              >
+                <FiTrash2 size={15} />
               </button>
 
               <button

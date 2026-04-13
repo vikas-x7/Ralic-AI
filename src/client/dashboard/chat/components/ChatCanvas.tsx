@@ -129,6 +129,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   const utils = trpc.useUtils();
   const chatQuery = trpc.chat.getChat.useQuery({ chatId });
   const saveCanvasMutation = trpc.chat.saveCanvas.useMutation();
+  const userQuery = trpc.auth.getUser.useQuery();
   const [hasInteracted, setHasInteracted] = useState(false);
   const [activeNodeId, setActiveNodeId] = useState(initialNodes[0].id);
   const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null);
@@ -458,7 +459,21 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
 
     setTimeout(() => {
       window.requestAnimationFrame(() => {
-        fitView({ duration: 800, padding: 0.1, maxZoom: 1 });
+        if (nextNodes.length > 0) {
+          let minX = Infinity,
+            minY = Infinity,
+            maxX = -Infinity,
+            maxY = -Infinity;
+          nextNodes.forEach((n) => {
+            minX = Math.min(minX, n.position.x);
+            minY = Math.min(minY, n.position.y);
+            maxX = Math.max(maxX, n.position.x + CHAT_NODE_WIDTH);
+            maxY = Math.max(maxY, n.position.y + 200);
+          });
+          const centerX = (minX + maxX) / 2;
+          const centerY = (minY + maxY) / 2;
+          setCenter(centerX, centerY, { duration: 800, zoom: getZoom() });
+        }
       });
     }, 100);
   }, [
@@ -467,7 +482,8 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     setEdges,
     setNodes,
     syncNodeInteractionHandler,
-    fitView,
+    setCenter,
+    getZoom,
   ]);
 
   useEffect(() => {
@@ -753,7 +769,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       )}
       <div
         aria-hidden={hasInteracted}
-        className={`pointer-events-none absolute top-75 right-138 z-20 flex w-100 items-center text-white/70 transition-all duration-500 ease-out ${
+        className={`pointer-events-none absolute top-55 right-130 z-20 flex w-100 items-center text-white/70 transition-all duration-500 ease-out ${
           hasInteracted
             ? '-translate-y-4 scale-95 opacity-0'
             : 'translate-y-0 scale-100 opacity-100'
@@ -766,24 +782,34 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
               alt=""
               width={80}
               height={80}
-              className="w-20 opacity-80"
+              className="w-17 opacity-80"
             />
             <div>
-              <h1 className="-ml-[16px] text-[42px] font-semibold -tracking-[2px]">
-                Relic ai
+              <h1 className="-ml-[16px] text-[35px] font-semibold -tracking-[1px]">
+                Relic AI
               </h1>
             </div>
           </div>
-          <p className="-mt-4 px-5">Welcome back Vikas pal to relic ai</p>
+          <p className="-mt-3 px-5">
+            Welcome back {userQuery.data?.name || 'User'} to relic ai
+          </p>
         </div>
       </div>
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodeClick={(_, node) => handleNodeFocus(node.id)}
+        onNodeClick={(_, node) => {
+          handleNodeFocus(node.id);
+          handleUserInteraction();
+        }}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnectEnd={onConnectEnd}
+        onPaneClick={handleUserInteraction}
+        onNodeDragStart={handleUserInteraction}
+        onMoveStart={(event) => {
+          if (event) handleUserInteraction();
+        }}
         isValidConnection={() => false}
         nodeTypes={nodeTypes}
         connectionMode={ConnectionMode.Loose}
@@ -821,7 +847,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
         />
       </ReactFlow>
 
-      <div className="absolute bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-[8px] bg-[#151515] p-1 shadow-xl shadow-black/40">
+      <div className="absolute bottom-5 left-25 z-40 flex -translate-x-1/2 items-center gap-1 rounded-[8px] bg-[#151515] p-1 shadow-xl shadow-black/40">
         <button
           type="button"
           onClick={() => void zoomOut({ duration: 180 })}

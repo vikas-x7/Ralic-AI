@@ -3,7 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BsArrowsAngleContract } from 'react-icons/bs';
 import { IoMdArrowUp } from 'react-icons/io';
-import { FiChevronDown, FiPlus, FiMic } from 'react-icons/fi';
+import {
+  FiChevronDown,
+  FiPlus,
+  FiMic,
+  FiCopy,
+  FiThumbsUp,
+  FiThumbsDown,
+  FiRefreshCw,
+  FiCheck,
+} from 'react-icons/fi';
 import MessageContent from './MessageContent';
 import { FcGoogle } from 'react-icons/fc';
 import { LiaLinkSolid } from 'react-icons/lia';
@@ -37,6 +46,33 @@ export default function FullscreenChat({
   const [input, setInput] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<
+    Partial<Record<number, 'like' | 'dislike'>>
+  >({});
+
+  const handleCopy = (content: string, index: number) => {
+    navigator.clipboard.writeText(content);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const handleFeedback = (index: number, type: 'like' | 'dislike') => {
+    setFeedback((prev) => ({
+      ...prev,
+      [index]: prev[index] === type ? undefined : type,
+    }));
+  };
+
+  const handleRetry = (index: number) => {
+    const prevMsg = messages
+      .slice(0, index)
+      .reverse()
+      .find((m) => m.role === 'user');
+    if (prevMsg) {
+      onSend(nodeId, prevMsg.content);
+    }
+  };
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -81,22 +117,6 @@ export default function FullscreenChat({
     <div className="absolute inset-0 z-50 flex flex-col bg-black">
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-[768px] px-4 py-6">
-          {messages.length === 0 && (
-            <div className="flex h-full min-h-[60vh] flex-col items-center justify-center text-center">
-              <img
-                src="/images/logo.png"
-                alt=""
-                className="mb-4 w-16 opacity-40"
-              />
-              <h2 className="mb-2 text-xl font-semibold text-gray-300">
-                Start a conversation
-              </h2>
-              <p className="text-sm text-gray-500">
-                Type a message below to begin
-              </p>
-            </div>
-          )}
-
           {messages.map((msg, i) => (
             <div
               key={i}
@@ -106,7 +126,7 @@ export default function FullscreenChat({
                 <div
                   onMouseUp={handleTextSelection}
                   onTouchEnd={handleTextSelection}
-                  className="py- max-w-[85%] rounded-2xl rounded-br-sm bg-[#202020] px-4 text-[15px] leading-7 text-gray-200"
+                  className="max-w-[85%] rounded-[5px] rounded-br-sm bg-[#202020] px-4 py-2 text-[15px] leading-7 text-gray-200"
                 >
                   <MessageContent
                     content={msg.content}
@@ -127,6 +147,43 @@ export default function FullscreenChat({
                       <MessageContent content={msg.content} />
                     )}
                   </div>
+
+                  {msg.status !== 'pending' && msg.content && (
+                    <div className="mt-2 flex items-center pl-2 text-white/40">
+                      <button
+                        onClick={() => handleCopy(msg.content, i)}
+                        className="flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors hover:bg-white/10 hover:text-white"
+                        title="Copy"
+                      >
+                        {copiedIndex === i ? (
+                          <FiCheck size={14} />
+                        ) : (
+                          <FiCopy size={14} />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleFeedback(i, 'like')}
+                        className={`flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors hover:bg-white/10 hover:text-white ${feedback[i] === 'like' ? 'bg-white/10 text-white' : ''}`}
+                        title="Like"
+                      >
+                        <FiThumbsUp size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleFeedback(i, 'dislike')}
+                        className={`flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors hover:bg-white/10 hover:text-white ${feedback[i] === 'dislike' ? 'bg-white/10 text-white' : ''}`}
+                        title="Dislike"
+                      >
+                        <FiThumbsDown size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleRetry(i)}
+                        className="flex h-7 w-7 items-center justify-center rounded-[5px] transition-colors hover:bg-white/10 hover:text-white"
+                        title="Retry"
+                      >
+                        <FiRefreshCw size={14} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -159,10 +216,10 @@ export default function FullscreenChat({
             <div className="mt-3 flex cursor-pointer items-center justify-between text-white/70">
               <div className="flex items-center gap-1">
                 <button
-                  className={`flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-3 py-0.5`}
+                  className={`flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-3 py-0.5 text-[13px]`}
                 >
                   <FcGoogle size={14} />
-                  <span>Gemma-2</span>
+                  <span>Gemma 2</span>
                 </button>
               </div>
 
