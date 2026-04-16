@@ -18,6 +18,7 @@ import {
   FiThumbsDown,
   FiRefreshCw,
   FiCheck,
+  FiSquare,
 } from 'react-icons/fi';
 import { IoMdArrowUp } from 'react-icons/io';
 import { BsArrowsFullscreen, BsFileMusic } from 'react-icons/bs';
@@ -35,9 +36,11 @@ export type ChatNodeData = {
     y: number;
   }>;
   messages?: ChatMessage[];
+  isStreaming?: boolean;
   onInteract?: () => void;
   onResponseHeightChange?: (nodeId: string, delta: number) => void;
   onSend?: (nodeId: string, message: string) => void;
+  onStop?: (nodeId: string) => void;
   onExpand?: (nodeId: string) => void;
   onFocusNode?: (nodeId: string) => void;
   onRequestDelete?: (nodeId: string) => void;
@@ -75,9 +78,11 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
     initialInput,
     messages = [],
     selectionAnchors = [],
+    isStreaming = false,
     onInteract,
     onResponseHeightChange,
     onSend,
+    onStop,
     onExpand,
     onFocusNode,
     onRequestDelete,
@@ -300,13 +305,23 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
                 <FiTrash2 size={15} />
               </button>
 
-              <button
-                onClick={handleSend}
-                disabled={!input.trim()}
-                className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/30 disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white"
-              >
-                <IoMdArrowUp size={18} />
-              </button>
+              {isStreaming ? (
+                <button
+                  onClick={() => onStop?.(customId)}
+                  className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/80 active:scale-90"
+                  title="Stop generating"
+                >
+                  <FiSquare size={14} className="fill-current" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSend}
+                  disabled={!input.trim()}
+                  className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/30 disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white"
+                >
+                  <IoMdArrowUp size={18} />
+                </button>
+              )}
             </div>
           </div>
         </div>

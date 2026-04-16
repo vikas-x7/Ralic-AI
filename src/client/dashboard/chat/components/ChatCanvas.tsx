@@ -131,6 +131,10 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   const saveCanvasMutation = trpc.chat.saveCanvas.useMutation();
   const userQuery = trpc.auth.getUser.useQuery();
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [streamingNodeIds, setStreamingNodeIds] = useState<Set<string>>(
+    new Set()
+  );
+  const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
   const [activeNodeId, setActiveNodeId] = useState(initialNodes[0].id);
   const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null);
   const [textSelectionAction, setTextSelectionAction] =
@@ -161,6 +165,16 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     (nodeId: string, message: string) => {
       setActiveNodeId(nodeId);
 
+      // Abort any existing stream for this node
+      const existingController = abortControllersRef.current.get(nodeId);
+      if (existingController) {
+        existingController.abort();
+        abortControllersRef.current.delete(nodeId);
+      }
+
+      const abortController = new AbortController();
+      abortControllersRef.current.set(nodeId, abortController);
+
       const userMessage: ChatMessage = { role: 'user', content: message };
       const pendingMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -181,6 +195,8 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           [nodeId]: [...current, userMessage, pendingMessage],
         };
       });
+
+      setStreamingNodeIds((prev) => new Set(prev).add(nodeId));
 
       void (async () => {
         let targetContent = '';
@@ -262,6 +278,15 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           });
         };
 
+        const cleanup = () => {
+          abortControllersRef.current.delete(nodeId);
+          setStreamingNodeIds((prev) => {
+            const next = new Set(prev);
+            next.delete(nodeId);
+            return next;
+          });
+        };
+
         try {
           const response = await fetch('/api/chat/stream', {
             method: 'POST',
@@ -269,6 +294,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({ chatId, nodeId, messages: conversation }),
+            signal: abortController.signal,
           });
 
           if (!response.ok) {
@@ -322,11 +348,33 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
             ),
           }));
 
+          cleanup();
           void utils.chat.getChats.invalidate();
           void utils.chat.getChat.invalidate({ chatId });
         } catch (error) {
           if (animationFrame !== null) {
             window.cancelAnimationFrame(animationFrame);
+          }
+
+          cleanup();
+
+          // If aborted (stopped by user), finalize with whatever content we have
+          if (abortController.signal.aborted) {
+            const stoppedContent =
+              displayedContent.trim() || targetContent.trim();
+            setNodeMessages((prev) => ({
+              ...prev,
+              [nodeId]: (prev[nodeId] || []).map((msg) =>
+                msg.id === pendingMessage.id
+                  ? {
+                      id: pendingMessage.id,
+                      role: 'assistant',
+                      content: stoppedContent || 'Response stopped.',
+                    }
+                  : msg
+              ),
+            }));
+            return;
           }
 
           setNodeMessages((prev) => ({
@@ -349,6 +397,13 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     },
     [chatId, nodeMessages, utils.chat.getChat, utils.chat.getChats]
   );
+
+  const handleStop = useCallback((nodeId: string) => {
+    const controller = abortControllersRef.current.get(nodeId);
+    if (controller) {
+      controller.abort();
+    }
+  }, []);
 
   const handleExpand = useCallback((nodeId: string) => {
     setActiveNodeId(nodeId);
@@ -380,15 +435,21 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   );
 
   const syncNodeInteractionHandler = useCallback(
-    (nextNodes: Node<ChatNodeData>[], msgs: Record<string, ChatMessage[]>) =>
+    (
+      nextNodes: Node<ChatNodeData>[],
+      msgs: Record<string, ChatMessage[]>,
+      currentStreamingIds: Set<string>
+    ) =>
       nextNodes.map((node) => ({
         ...node,
         data: {
           ...node.data,
           messages: msgs[node.data.customId] || [],
+          isStreaming: currentStreamingIds.has(node.data.customId),
           onInteract: handleUserInteraction,
           onResponseHeightChange: handleResponseHeightChange,
           onSend: handleSend,
+          onStop: handleStop,
           onExpand: handleExpand,
           onFocusNode: handleNodeFocus,
           onTextSelection: handleTextSelection,
@@ -398,6 +459,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       handleUserInteraction,
       handleResponseHeightChange,
       handleSend,
+      handleStop,
       handleExpand,
       handleNodeFocus,
       handleTextSelection,
@@ -405,7 +467,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   );
 
   const [nodes, setNodes] = useState<Node<ChatNodeData>[]>(() =>
-    syncNodeInteractionHandler(initialNodes, {})
+    syncNodeInteractionHandler(initialNodes, {}, new Set())
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
@@ -449,7 +511,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     setNodeMessages(messagesByNode);
     setHasInteracted(Object.keys(messagesByNode).length > 0);
     setActiveNodeId(nextNodes[0]?.id || initialNodes[0].id);
-    setNodes(syncNodeInteractionHandler(nextNodes, messagesByNode));
+    setNodes(syncNodeInteractionHandler(nextNodes, messagesByNode, new Set()));
     setEdges(nextEdges);
 
     loadedChatIdRef.current = chatId;
@@ -584,8 +646,10 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   }, [setNodes]);
 
   useEffect(() => {
-    setNodes((nds) => syncNodeInteractionHandler(nds, nodeMessages));
-  }, [nodeMessages, syncNodeInteractionHandler]);
+    setNodes((nds) =>
+      syncNodeInteractionHandler(nds, nodeMessages, streamingNodeIds)
+    );
+  }, [nodeMessages, streamingNodeIds, syncNodeInteractionHandler]);
 
   useEffect(() => {
     if (!textSelectionAction) return;
@@ -609,11 +673,12 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       setNodes((nds) =>
         syncNodeInteractionHandler(
           applyNodeChanges(changes, nds) as Node<ChatNodeData>[],
-          nodeMessages
+          nodeMessages,
+          streamingNodeIds
         )
       );
     },
-    [syncNodeInteractionHandler, nodeMessages]
+    [syncNodeInteractionHandler, nodeMessages, streamingNodeIds]
   );
 
   const onConnectEnd = useCallback(
@@ -888,7 +953,9 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
         <FullscreenChat
           nodeId={expandedNodeId}
           messages={nodeMessages[expandedNodeId] || []}
+          isStreaming={streamingNodeIds.has(expandedNodeId)}
           onSend={handleSend}
+          onStop={handleStop}
           onClose={handleCloseFullscreen}
           onTextSelection={handleTextSelection}
         />

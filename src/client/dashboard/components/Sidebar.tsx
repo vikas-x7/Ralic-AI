@@ -189,10 +189,10 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
         }`}
       >
         <div className="flex h-full w-[260px] flex-col">
-          <div className="flex items-center justify-between border-b border-[#2a2a2a] pr-3">
+          <div className="flex items-center justify-between pr-3">
             <div className="flex items-center text-white">
-              <img src="/images/logo.png" alt="" className="w-10" />
-              <h1 className="mt-0.5 -ml-1 text-[17px] font-medium tracking-tight">
+              <img src="/images/logo.png" alt="" className="w-11" />
+              <h1 className="mt-0.5 -ml-1 text-[19px] font-medium tracking-tight">
                 Relic AI
               </h1>
             </div>
