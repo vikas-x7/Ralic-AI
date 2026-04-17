@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function EventsSection() {
   return (
-    <div className="mx-auto mt-32 w-full px-24 pb-32">
+    <div className="mx-auto mt-32 w-full px-4 pb-32 md:px-24">
       <div className="mb-12 max-w-2xl">
         <h2 className="mb-4 text-[42px] font-medium -tracking-[1px] text-white">
           Core Capabilities

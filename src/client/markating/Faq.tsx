@@ -62,13 +62,13 @@ export default function FAQ() {
   const [activeIndex, setActiveIndex] = useState<string | null>('1-0');
 
   return (
-    <section className="w-full bg-black px-17 py-20 text-white lg:py-28">
+    <section className="w-full bg-black px-3 py-20 text-white md:px-17 lg:py-28">
       <div>
-        <h2 className="mb-20 text-center text-4xl font-medium -tracking-[4px] md:text-5xl">
+        <h2 className="mb-20 text-center text-3xl font-medium -tracking-[2px] md:text-5xl md:-tracking-[4px]">
           Frequently Asked Questions
         </h2>
       </div>
-      <div className="grid gap-16 px-6 lg:grid-cols-2 lg:px-8">
+      <div className="px- ap-0 grid md:gap-16 lg:grid-cols-2 lg:px-8">
         <div className="">
           {faqs1.map((f, i) => {
             const id = `1-${i}`;

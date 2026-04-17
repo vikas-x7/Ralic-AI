@@ -1,30 +1,9 @@
+import MarqueeSection from '@/client/markating/MarqueeSection';
+
 export default function ComplexitySection() {
   return (
-    <section id="use-case" className="bg-black px-23 py-24 text-white">
-      <div className="mx-auto">
-        <div className="flex flex-col items-start justify-between gap-8 border-b border-white/10 pb-10 md:flex-row">
-          <p className="max-w-md text-sm text-white">
-            Generate and edit complex system architectures instantly through
-            natural language and diagram-as-code.
-          </p>
-
-          <div className="flex flex-col gap-8 sm:flex-row sm:gap-16">
-            <div>
-              <p className="text-xs text-white/40 uppercase">
-                Diagrams generated
-              </p>
-              <h2 className="mt-2 text-4xl">100+</h2>
-            </div>
-
-            <div>
-              <p className="text-xs text-white/40 uppercase">
-                Supported syntaxes
-              </p>
-              <h2 className="mt-2 text-4xl">15+</h2>
-            </div>
-          </div>
-        </div>
-
+    <section className="flex flex-col bg-black px-4 py-24 text-white md:mt-0 md:px-23">
+      <div className="mx-auto mt-40">
         <div className="mt-20 grid items-start gap-16 md:grid-cols-2">
           <div>
             <div className="mb-4 flex items-center gap-2">
@@ -34,7 +13,7 @@ export default function ComplexitySection() {
               </span>
             </div>
 
-            <h1 className="text-5xl leading-12 font-medium -tracking-[4px] md:text-6xl">
+            <h1 className="text-4xl leading-8 font-medium -tracking-[2px] md:text-6xl md:leading-12 md:-tracking-[4px]">
               Built to handle <br /> complexity
             </h1>
           </div>
@@ -62,9 +41,32 @@ export default function ComplexitySection() {
             </div>
           </div>
         </div>
+
+        <div className="mt-20 flex flex-col items-start justify-between gap-8 border-t border-dashed border-white/10 pt-10 pb-10 md:flex-row">
+          <p className="max-w-md text-sm text-white">
+            Generate and edit complex system architectures instantly through
+            natural language and diagram-as-code.
+          </p>
+
+          <div className="flex gap-8 sm:flex-row sm:gap-16">
+            <div>
+              <p className="text-xs text-white/40 uppercase">
+                Diagrams generated
+              </p>
+              <h2 className="mt-2 text-4xl">100+</h2>
+            </div>
+
+            <div>
+              <p className="text-xs text-white/40 uppercase">
+                Supported syntaxes
+              </p>
+              <h2 className="mt-2 text-4xl">15+</h2>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-20 items-center gap-16">
+      <div className="mt-20 mb-30 items-center gap-16">
         <div className="flex items-center justify-center border border-white/10">
           <img
             src="https://res.cloudinary.com/dyv9kenuj/image/upload/v1776662627/Screenshot_from_2026-04-20_10-51-59_ye8dbr.png"

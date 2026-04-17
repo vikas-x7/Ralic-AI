@@ -12,6 +12,7 @@ import {
   FiThumbsDown,
   FiRefreshCw,
   FiCheck,
+  FiSquare,
 } from 'react-icons/fi';
 import MessageContent from './MessageContent';
 import { FcGoogle } from 'react-icons/fc';
@@ -27,7 +28,9 @@ export interface ChatMessage {
 interface FullscreenChatProps {
   nodeId: string;
   messages: ChatMessage[];
+  isStreaming?: boolean;
   onSend: (nodeId: string, message: string) => void;
+  onStop: (nodeId: string) => void;
   onClose: () => void;
   onTextSelection?: (
     nodeId: string,
@@ -39,7 +42,9 @@ interface FullscreenChatProps {
 export default function FullscreenChat({
   nodeId,
   messages,
+  isStreaming = false,
   onSend,
+  onStop,
   onClose,
   onTextSelection,
 }: FullscreenChatProps) {
@@ -236,13 +241,23 @@ export default function FullscreenChat({
                   <BsArrowsAngleContract size={14} />
                 </button>
 
-                <button
-                  onClick={handleSend}
-                  disabled={!input.trim()}
-                  className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/30 disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white"
-                >
-                  <IoMdArrowUp size={18} />
-                </button>
+                {isStreaming ? (
+                  <button
+                    onClick={() => onStop(nodeId)}
+                    className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/80 active:scale-90"
+                    title="Stop generating"
+                  >
+                    <FiSquare size={14} className="fill-current" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSend}
+                    disabled={!input.trim()}
+                    className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/30 disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white"
+                  >
+                    <IoMdArrowUp size={18} />
+                  </button>
+                )}
               </div>
             </div>
           </div>
