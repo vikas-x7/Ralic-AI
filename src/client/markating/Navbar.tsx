@@ -33,7 +33,7 @@ export default function Navbar() {
 
       <div className="flex items-center gap-4">
         <Link
-          href="/auth"
+          href="/login"
           className="cursor-pointer bg-white px-2 py-1 text-[10px] font-medium text-black md:px-4 md:py-1 md:text-[12px] md:-tracking-[0.5px]"
         >
           Get start

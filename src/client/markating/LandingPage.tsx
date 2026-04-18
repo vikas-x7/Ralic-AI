@@ -15,9 +15,8 @@ export default function LandingPage() {
       <Hero />
       <ComplexitySection />
       <EventsSection />
-
-      <Faq />
       <Getstart />
+      {/* <Faq /> */}
 
       <Footer />
     </div>

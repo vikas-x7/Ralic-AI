@@ -55,9 +55,9 @@ export default function Hero() {
 
   return (
     <section className="relative">
-      <div className="md:mt z-10 flex h-screen items-start justify-center text-center">
-        <div className="relative flex h-[80vh] w-full items-center justify-center overflow-hidden border-white/10 md:h-screen md:w-[90vw] md:border-x">
-          <div className="absolute w-full flex-col items-center justify-center">
+      <div className="md:mt z-10 mt-30 flex items-start justify-center text-center md:mt-0">
+        <div className="relative flex w-full items-center justify-center overflow-hidden border-white/10 md:h-screen md:w-[90vw] md:border-x">
+          <div className="w-full flex-col items-center justify-center">
             <p className="mb-2 inline-block rounded-4xl border border-white/10 px-4 py-1 text-[10px] tracking-[0] backdrop-blur-md md:mb-6 md:px-4 md:py-1.5 md:text-[12px] md:-tracking-[0.5px]">
               Multiple AI conversations, one powerful workspace
             </p>
@@ -85,7 +85,7 @@ export default function Hero() {
               </Link>
             </div>
 
-            <div className="relative mx-auto mt-10 inline-block w-[330px] p-0.5 md:w-full md:max-w-2xl">
+            <div className="relative mx-auto mt-5 inline-block w-[330px] p-0.5 md:w-full md:max-w-2xl">
               <span className="absolute top-0 left-0 h-2 w-2 border-t-2 border-l-2 border-white/70 md:h-4 md:w-4" />
               <span className="absolute top-0 right-0 h-2 w-2 border-t-2 border-r-2 border-white/70 md:h-4 md:w-4" />
               <span className="absolute bottom-0 left-0 h-2 w-2 border-b-2 border-l-2 border-white/70 md:h-4 md:w-4" />
@@ -132,16 +132,10 @@ export default function Hero() {
               </div>
             </div>
           </div>
-          <div className="mt-120 md:hidden">
-            <img
-              src="https://i.pinimg.com/originals/ae/2a/97/ae2a97eec70c47a66870096e5801cb47.gif"
-              alt=""
-              className="w-30 opacity-35"
-            />
-          </div>
         </div>
+
         <div className="hidden md:flex">
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 h-35 bg-gradient-to-t from-black to-transparent" />
+          <div className="z- pointer-events-none absolute inset-x-0 bottom-0 h-35 bg-gradient-to-t from-black to-transparent" />
         </div>
       </div>
     </section>

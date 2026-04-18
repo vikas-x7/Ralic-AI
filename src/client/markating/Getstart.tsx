@@ -1,6 +1,6 @@
 export default function Getstart() {
   return (
-    <div className="relative h-[50vh] overflow-hidden md:h-screen">
+    <div className="relative h-[50vh] overflow-hidden md:h-[60vh]">
       <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
         <p className="mb-1 text-[18px] font-medium tracking-tight sm:text-[24px] md:text-[30px] md:-tracking-[2px]">
           Don&apos;t Go with flow

@@ -38,7 +38,7 @@ export default function MarqueeSection() {
                   <img
                     src={image}
                     alt={group === 0 ? `logo-${i + 1}` : ''}
-                    className="h-6 w-auto max-w-full object-contain md:max-h-8"
+                    className="h-6 w-auto max-w-full object-contain md:h-9"
                   />
                 </div>
               ))}

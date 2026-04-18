@@ -73,10 +73,10 @@ export default function LoginPage({ error }: LoginPageProps) {
 
         <div className="absolute bottom-[3%] left-[3%]">
           <p className="-mb-3 text-start text-[30px] font-medium -tracking-[2px]">
-            Don&apos;t Go with flow Start using
+            Don&apos;t Go with flow
           </p>
-          <h1 className="text-[100px] leading-25 font-semibold -tracking-[10px]">
-            Start using relic.ai
+          <h1 className="text-[100px] leading-25 font-semibold -tracking-[8px]">
+            Start using relic ai
           </h1>
           <div></div>
         </div>
@@ -88,11 +88,11 @@ export default function LoginPage({ error }: LoginPageProps) {
             alt=""
             className="h-11 w-11"
           />
-          <h1 className="-ml-2 text-[20px]">Relic.ai</h1>
+          <h1 className="-ml-2 text-[20px]">Relic ai</h1>
         </div>
         <div className="w-full max-w-md px-6 text-center">
           <div className="mb-8 flex flex-col items-center justify-center">
-            <h1 className="flex items-center gap-2 text-center text-[30px] -tracking-[2px]">
+            <h1 className="flex items-center gap-2 text-center text-[30px] -tracking-[1px]">
               Continue to your account
             </h1>
             <p className="mt-1 text-sm text-neutral-500">

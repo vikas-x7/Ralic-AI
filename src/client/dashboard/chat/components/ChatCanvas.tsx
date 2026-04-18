@@ -50,6 +50,31 @@ const initialNodes: Node<ChatNodeData>[] = [
 
 const NEW_NODE_HORIZONTAL_GAP = 160;
 const NEW_NODE_VERTICAL_GAP = 60;
+
+/**
+ * Walk the edge graph backwards from `nodeId` to collect an ordered list of
+ * ancestor node IDs (root-first). This lets a child node inherit the full
+ * conversation context from its parent chain.
+ */
+function getAncestorChain(nodeId: string, edgeList: Edge[]): string[] {
+  const ancestors: string[] = [];
+  const visited = new Set<string>();
+  let current = nodeId;
+
+  while (true) {
+    if (visited.has(current)) break;
+    visited.add(current);
+
+    // Find the edge whose target is the current node
+    const incomingEdge = edgeList.find((e) => e.target === current);
+    if (!incomingEdge) break;
+
+    ancestors.unshift(incomingEdge.source);
+    current = incomingEdge.source;
+  }
+
+  return ancestors;
+}
 const STREAM_MIN_REVEAL_RATE = 70;
 const STREAM_MAX_REVEAL_RATE = 520;
 const STREAM_FRAME_CAP_MS = 80;
@@ -144,12 +169,20 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   >({});
   const loadedChatIdRef = useRef<string | null>(null);
   const lastSavedCanvasRef = useRef<string | null>(null);
+  const edgesRef = useRef<Edge[]>([]);
 
   const setNodesRef = useRef<Dispatch<
     SetStateAction<Node<ChatNodeData>[]>
   > | null>(null);
-  const { getZoom, getNode, setCenter, fitView, zoomIn, zoomOut } =
-    useReactFlow();
+  const {
+    getZoom,
+    getNode,
+    setCenter,
+    fitView,
+    zoomIn,
+    zoomOut,
+    screenToFlowPosition,
+  } = useReactFlow();
 
   const handleUserInteraction = useCallback(() => {
     setHasInteracted(true);
@@ -182,7 +215,16 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
         content: '',
         status: 'pending',
       };
+      // Walk the edge graph backwards to collect ancestor conversation context
+      const ancestorIds = getAncestorChain(nodeId, edgesRef.current);
+      const ancestorMessages = ancestorIds.flatMap((ancestorId) =>
+        (nodeMessages[ancestorId] || [])
+          .filter((msg) => !msg.status)
+          .map(({ role, content }) => ({ role, content }))
+      );
+
       const conversation = [
+        ...ancestorMessages,
         ...(nodeMessages[nodeId] || []).filter((msg) => !msg.status),
         userMessage,
       ].map(({ role, content }) => ({ role, content }));
@@ -471,6 +513,12 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
+  // Keep edgesRef in sync so handleSend can walk the ancestor chain
+  // without needing `edges` in its dependency array.
+  useEffect(() => {
+    edgesRef.current = edges;
+  }, [edges]);
+
   useEffect(() => {
     if (!chatQuery.data || loadedChatIdRef.current === chatId) return;
 
@@ -567,14 +615,16 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   const handleCreateNodeFromSelection = useCallback(() => {
     if (!textSelectionAction) return;
 
-    const sourceNode = getNode(textSelectionAction.sourceNodeId);
     const id = crypto.randomUUID();
-    const sourceNodeWidth = sourceNode?.measured?.width ?? CHAT_NODE_WIDTH;
-    const sourceNodeHeight = sourceNode?.measured?.height ?? 180;
-    const sourcePosition = sourceNode?.position ?? { x: 0, y: 0 };
+
+    // Place the new node where the "New node" popup is on screen
+    const flowPos = screenToFlowPosition({
+      x: textSelectionAction.x,
+      y: textSelectionAction.y,
+    });
     const newNodePosition = {
-      x: sourcePosition.x + sourceNodeWidth + NEW_NODE_HORIZONTAL_GAP,
-      y: sourcePosition.y + sourceNodeHeight + NEW_NODE_VERTICAL_GAP,
+      x: flowPos.x - CHAT_NODE_WIDTH / 2,
+      y: flowPos.y,
     };
 
     const newNode: Node<ChatNodeData> = {
@@ -612,16 +662,8 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     );
 
     void setCenter(
-      (sourcePosition.x +
-        sourceNodeWidth / 2 +
-        newNodePosition.x +
-        CHAT_NODE_WIDTH / 2) /
-        2,
-      (sourcePosition.y +
-        sourceNodeHeight / 2 +
-        newNodePosition.y +
-        sourceNodeHeight / 2) /
-        2,
+      newNodePosition.x + CHAT_NODE_WIDTH / 2,
+      newNodePosition.y + 100,
       {
         duration: 350,
         ease: (t) => 1 - Math.pow(1 - t, 3),
@@ -629,13 +671,13 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       }
     );
   }, [
-    getNode,
     getZoom,
     handleExpand,
     handleResponseHeightChange,
     handleSend,
     handleTextSelection,
     handleUserInteraction,
+    screenToFlowPosition,
     setCenter,
     setEdges,
     textSelectionAction,
@@ -682,10 +724,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   );
 
   const onConnectEnd = useCallback(
-    (
-      _event: MouseEvent | TouchEvent,
-      connectionState: FinalConnectionState
-    ) => {
+    (event: MouseEvent | TouchEvent, connectionState: FinalConnectionState) => {
       if (
         connectionState.isValid ||
         !connectionState.fromNode ||
@@ -705,18 +744,22 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           ? CHAT_NODE_HANDLE_IDS.right
           : CHAT_NODE_HANDLE_IDS.left;
 
-      const sourceNodePosition =
-        connectionState.fromNode.internals.positionAbsolute;
-      const sourceNodeWidth =
-        connectionState.fromNode.measured.width ?? CHAT_NODE_WIDTH;
-      const sourceNodeHeight = connectionState.fromNode.measured.height ?? 180;
+      // Place the node exactly where the user dropped the connection
+      const clientX =
+        event instanceof MouseEvent
+          ? event.clientX
+          : (event.changedTouches?.[0]?.clientX ?? 0);
+      const clientY =
+        event instanceof MouseEvent
+          ? event.clientY
+          : (event.changedTouches?.[0]?.clientY ?? 0);
+
+      const dropPosition = screenToFlowPosition({ x: clientX, y: clientY });
       const newNodePosition = {
-        x:
-          targetHandle === CHAT_NODE_HANDLE_IDS.right
-            ? sourceNodePosition.x - CHAT_NODE_WIDTH - NEW_NODE_HORIZONTAL_GAP
-            : sourceNodePosition.x + sourceNodeWidth + NEW_NODE_HORIZONTAL_GAP,
-        y: sourceNodePosition.y + sourceNodeHeight + NEW_NODE_VERTICAL_GAP,
+        x: dropPosition.x - CHAT_NODE_WIDTH / 2,
+        y: dropPosition.y,
       };
+
       const newNode: Node<ChatNodeData> = {
         id,
         type: 'chatNode',
@@ -730,10 +773,6 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           onExpand: handleExpand,
         },
       };
-      const sourceNodeCenterX = sourceNodePosition.x + sourceNodeWidth / 2;
-      const sourceNodeCenterY = sourceNodePosition.y + sourceNodeHeight / 2;
-      const newNodeCenterX = newNode.position.x + CHAT_NODE_WIDTH / 2;
-      const newNodeCenterY = newNode.position.y + sourceNodeHeight / 2;
 
       setHasInteracted(true);
       setActiveNodeId(id);
@@ -751,8 +790,8 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       );
 
       void setCenter(
-        (sourceNodeCenterX + newNodeCenterX) / 2,
-        (sourceNodeCenterY + newNodeCenterY) / 2,
+        newNodePosition.x + CHAT_NODE_WIDTH / 2,
+        newNodePosition.y + 100,
         {
           duration: 350,
           ease: (t) => 1 - Math.pow(1 - t, 3),
@@ -766,6 +805,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       handleResponseHeightChange,
       handleSend,
       handleExpand,
+      screenToFlowPosition,
       setCenter,
       setNodes,
       setEdges,

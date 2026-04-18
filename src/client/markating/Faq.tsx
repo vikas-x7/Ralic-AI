@@ -62,91 +62,52 @@ export default function FAQ() {
   const [activeIndex, setActiveIndex] = useState<string | null>('1-0');
 
   return (
-    <section className="w-full bg-black px-3 py-20 text-white md:px-17 lg:py-28">
-      <div>
-        <h2 className="mb-20 text-center text-3xl font-medium -tracking-[2px] md:text-5xl md:-tracking-[4px]">
+    <section className="w-full bg-black px-4 py-14 text-white sm:px-6 md:flex md:px-10 lg:px-16 lg:py-28">
+      <div className="mb-10 w-full md:mb-0 md:w-[35%]">
+        <h2 className="text-3xl font-medium -tracking-[2px] sm:text-4xl md:text-5xl md:-tracking-[4px]">
           Frequently Asked Questions
         </h2>
       </div>
-      <div className="px- ap-0 grid md:gap-16 lg:grid-cols-2 lg:px-8">
-        <div className="">
-          {faqs1.map((f, i) => {
-            const id = `1-${i}`;
-            return (
-              <div key={i} className="mb-3">
-                <button
-                  onClick={() => setActiveIndex(activeIndex === id ? null : id)}
-                  className="flex w-full cursor-pointer items-center justify-between bg-[#0b0b0b] px-3 py-3 text-left"
-                >
-                  <span className="cursor-pointer text-[16px] sm:text-[15px]">
-                    {f.question}
-                  </span>
 
-                  <span
-                    className={`text-xl transition-transform duration-300 ${
-                      activeIndex === id ? 'rotate-45' : ''
-                    }`}
-                  >
-                    +
-                  </span>
-                </button>
+      <div className="w-full md:w-[65%]">
+        {faqs2.map((f, i) => {
+          const id = `2-${i}`;
 
-                <div
-                  className={`grid transition-all duration-300 ${
-                    activeIndex === id
-                      ? 'grid-rows-[1fr] pb-6 opacity-100'
-                      : 'grid-rows-[0fr] opacity-0'
+          return (
+            <div key={i} className="mb-3">
+              <button
+                onClick={() => setActiveIndex(activeIndex === id ? null : id)}
+                className="flex w-full items-center justify-between bg-[#0b0b0b] px-4 py-4 text-left"
+              >
+                <span className="pr-4 text-sm leading-6 sm:text-[15px] md:text-[16px]">
+                  {f.question}
+                </span>
+
+                <span
+                  className={`shrink-0 text-xl transition-transform duration-300 ${
+                    activeIndex === id ? 'rotate-45' : ''
                   }`}
                 >
-                  <div className="overflow-hidden">
-                    <p className="bg-[#0b0b0b] px-4 py-2 pr-4 text-sm leading-relaxed text-white/60 md:text-base">
-                      {f.answer}
-                    </p>
-                  </div>
+                  +
+                </span>
+              </button>
+
+              <div
+                className={`grid transition-all duration-300 ${
+                  activeIndex === id
+                    ? 'grid-rows-[1fr] pb-4 opacity-100'
+                    : 'grid-rows-[0fr] opacity-0'
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <p className="bg-[#0b0b0b] px-4 py-2 text-sm leading-7 text-white/60 md:text-base">
+                    {f.answer}
+                  </p>
                 </div>
               </div>
-            );
-          })}
-        </div>
-        <div className="">
-          {faqs2.map((f, i) => {
-            const id = `2-${i}`;
-            return (
-              <div key={i} className="mb-3">
-                <button
-                  onClick={() => setActiveIndex(activeIndex === id ? null : id)}
-                  className="flex w-full cursor-pointer items-center justify-between bg-[#0b0b0b] px-3 py-3 text-left"
-                >
-                  <span className="cursor-pointer text-[16px] sm:text-[15px]">
-                    {f.question}
-                  </span>
-
-                  <span
-                    className={`text-xl transition-transform duration-300 ${
-                      activeIndex === id ? 'rotate-45' : ''
-                    }`}
-                  >
-                    +
-                  </span>
-                </button>
-
-                <div
-                  className={`grid transition-all duration-300 ${
-                    activeIndex === id
-                      ? 'grid-rows-[1fr] pb-6 opacity-100'
-                      : 'grid-rows-[0fr] opacity-0'
-                  }`}
-                >
-                  <div className="overflow-hidden">
-                    <p className="bg-[#0b0b0b] px-4 py-2 pr-4 text-sm leading-relaxed text-white/60 md:text-base">
-                      {f.answer}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
