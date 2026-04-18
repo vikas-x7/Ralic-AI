@@ -69,7 +69,7 @@ export default function ComplexitySection() {
       <div className="mt-20 mb-30 items-center gap-16">
         <div className="flex items-center justify-center border border-white/10">
           <img
-            src="https://res.cloudinary.com/dyv9kenuj/image/upload/v1776662627/Screenshot_from_2026-04-20_10-51-59_ye8dbr.png"
+            src="https://res.cloudinary.com/dyv9kenuj/image/upload/v1778436130/Screenshot_from_2026-05-10_23-28-57_xfevr2.png"
             alt="preview"
             className="w-full shadow-2xl"
           />

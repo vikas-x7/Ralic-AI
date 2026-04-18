@@ -15,8 +15,8 @@ export default function Getstart() {
 
           <span className="absolute right-0 bottom-0 h-3 w-3 border-r-2 border-b-2 border-white/30 sm:h-4 sm:w-4" />
 
-          <h1 className="border border-dashed border-white/20 px-5 py-4 pr-4 text-[32px] leading-none font-semibold -tracking-[2px] sm:px-4 sm:py-10 sm:pr-5 sm:text-[60px] md:px-5 md:py-13 md:pr-7 md:text-[130px] md:leading-10 md:-tracking-[12px]">
-            Getstart with Relic AI
+          <h1 className="border border-dashed border-white/20 px-5 py-4 pr-4 text-[32px] leading-none font-medium -tracking-[2px] sm:px-4 sm:py-10 sm:pr-5 sm:text-[60px] md:px-5 md:py-13 md:pr-7 md:text-[130px] md:leading-10 md:-tracking-[10px]">
+            Getstart with Relic ai
           </h1>
         </div>
       </div>
