@@ -1,50 +1,48 @@
 'use client';
 
-const mindMapNodes = [
-  {
-    name: 'AI-powered canvas for architecture diagrams',
-  },
-  {
-    name: 'Design, visualize, and iterate with intelligent nodes',
-  },
-  {
-    name: 'Build system architectures in minutes, not hours',
-  },
-  {
-    name: 'Node-based workflows powered by AI',
-  },
-  {
-    name: 'From idea to architecture diagram instantly',
-  },
-  {
-    name: 'Collaborate and brainstorm on an infinite canvas',
-  },
-  {
-    name: 'AI-assisted diagram generation and refinement',
-  },
-  {
-    name: 'Think visually, build systematically with relic.ai',
-  },
-  {
-    name: 'Drag, connect, and let AI do the rest',
-  },
-  {
-    name: 'The smartest way to design your system architecture',
-  },
+const marqueeImages = [
+  'https://thesvg.org/icons/gemini/default.svg',
+  'https://thesvg.org/icons/kimi/default.svg',
+  'https://thesvg.org/icons/minimax/default.svg',
+  'https://thesvg.org/icons/deepseek/default.svg',
+  'https://thesvg.org/icons/mistral/default.svg',
+  'https://thesvg.org/icons/gemini/default.svg',
+  'https://thesvg.org/icons/kimi/default.svg',
+  'https://thesvg.org/icons/gemini/default.svg',
+  'https://thesvg.org/icons/kimi/default.svg',
+  'https://thesvg.org/icons/minimax/default.svg',
+  'https://thesvg.org/icons/deepseek/default.svg',
+  'https://thesvg.org/icons/mistral/default.svg',
+  'https://thesvg.org/icons/gemini/default.svg',
+  'https://thesvg.org/icons/kimi/default.svg',
 ];
 
 export default function MarqueeSection() {
+  const marqueeItems = [...marqueeImages, ...marqueeImages];
+
   return (
-    <section className="z-200 w-full overflow-hidden backdrop-blur-md">
-      <div className="flex">
-        <div className="animate-marquee flex whitespace-nowrap">
-          {[...mindMapNodes, ...mindMapNodes].map((node, i) => (
-            <span
-              key={i}
-              className="mx-5 text-[13px] opacity-80 transition-opacity duration-200 select-none hover:opacity-100 sm:mx-8 sm:text-[15px] md:mx-10 md:text-[11px]"
+    <section className="marquee-fade w-full max-w-full overflow-hidden py-4 backdrop-blur-md">
+      <div className="flex w-full overflow-hidden">
+        <div className="animate-marquee flex w-max min-w-max items-center">
+          {[0, 1].map((group) => (
+            <div
+              key={group}
+              className="flex shrink-0 items-center md:gap-12 md:pr-12"
+              aria-hidden={group === 1}
             >
-              {node.name}
-            </span>
+              {marqueeItems.map((image, i) => (
+                <div
+                  key={`${group}-${i}`}
+                  className="flex h-10 w-16 shrink-0 items-center justify-center opacity-70 grayscale transition-opacity duration-300 hover:opacity-100 md:h-12 md:w-20"
+                >
+                  <img
+                    src={image}
+                    alt={group === 0 ? `logo-${i + 1}` : ''}
+                    className="h-6 w-auto max-w-full object-contain md:max-h-8"
+                  />
+                </div>
+              ))}
+            </div>
           ))}
         </div>
       </div>

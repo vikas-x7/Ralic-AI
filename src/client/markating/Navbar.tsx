@@ -3,16 +3,16 @@ import { FiChevronDown } from 'react-icons/fi';
 
 export default function Navbar() {
   return (
-    <nav className="fixed top-0 right-0 left-0 z-50 flex w-full items-center justify-between border-b border-white/10 px-20 py-1.5 backdrop-blur-md">
-      <div className="flex items-center gap-2 text-xl font-semibold">
-        <div className="">
+    <nav className="fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b border-white/10 px-2 py-2 backdrop-blur-md md:px-10">
+      <div className="flex items-center justify-center gap-3 text-xl font-semibold md:gap-2">
+        <div className="w-7 md:w-10">
           <img
             src="https://res.cloudinary.com/dyv9kenuj/image/upload/v1777271807/ralicai-removebg-preview_p4egp8.png"
             alt=""
             className="w-11 object-center"
           />
         </div>
-        <h1 className="-ml-4 text-[20px] font-medium -tracking-[1px]">
+        <h1 className="mt-0.5 -ml-4 text-[13px] font-medium -tracking-[0.5px] md:text-[20px] md:-tracking-[1px]">
           Relic ai
         </h1>
       </div>
@@ -34,7 +34,7 @@ export default function Navbar() {
       <div className="flex items-center gap-4">
         <Link
           href="/auth"
-          className="cursor-pointer bg-white px-4 py-1 text-sm font-medium -tracking-[0.5px] text-black"
+          className="cursor-pointer bg-white px-2 py-1 text-[10px] font-medium text-black md:px-4 md:py-1 md:text-[12px] md:-tracking-[0.5px]"
         >
           Get start
         </Link>

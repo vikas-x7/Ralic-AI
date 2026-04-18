@@ -15,6 +15,7 @@ import { IoAddOutline, IoMicOutline } from 'react-icons/io5';
 import Getstart from './Getstart';
 import Navbar from './Navbar';
 import { FcGoogle } from 'react-icons/fc';
+import MarqueeSection from '@/client/markating/MarqueeSection';
 
 export default function Hero() {
   const placeholders = [
@@ -30,7 +31,7 @@ export default function Hero() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const typingSpeed = isDeleting ? 3 : 8;
+    const typingSpeed = isDeleting ? 3 : 20;
     const currentText = placeholders[placeholderIndex];
 
     const handleTyping = () => {
@@ -53,82 +54,94 @@ export default function Hero() {
   }, [charIndex, isDeleting, placeholderIndex]);
 
   return (
-    <section>
-      <div className="relative z-10 mt-10 mb-18 flex items-center justify-center text-center">
-        <img
-          src="https://res.cloudinary.com/dyv9kenuj/image/upload/v1777604747/relicherobg-noise_tfvizv.jpg"
-          alt=""
-          className="contrast-more: relative opacity-5 grayscale"
-        />
-        <div className="absolute w-full flex-col items-center justify-center">
-          <p className="mb-6 inline-block rounded-4xl border border-white/10 px-4 py-1.5 text-[12px] -tracking-[0.5px] backdrop-blur-md">
-            Multiple AI conversations, one powerful workspace
-          </p>
+    <section className="relative">
+      <div className="md:mt z-10 flex h-screen items-start justify-center text-center">
+        <div className="relative flex h-[80vh] w-full items-center justify-center overflow-hidden border-white/10 md:h-screen md:w-[90vw] md:border-x">
+          <div className="absolute w-full flex-col items-center justify-center">
+            <p className="mb-2 inline-block rounded-4xl border border-white/10 px-4 py-1 text-[10px] tracking-[0] backdrop-blur-md md:mb-6 md:px-4 md:py-1.5 md:text-[12px] md:-tracking-[0.5px]">
+              Multiple AI conversations, one powerful workspace
+            </p>
 
-          <h1 className="text-3xl leading-14 font-medium -tracking-[4px] text-white/95 md:text-[54px]">
-            Your thoughts Don&apos;t Flow in a Straight <br /> Line Your AI
-            should not Either
-          </h1>
+            <h1 className="text-[23px] leading-7 font-medium -tracking-[1.5px] text-white/95 md:text-3xl md:text-[54px] md:leading-14 md:-tracking-[4px]">
+              Your thoughts Don&apos;t Flow in a Straight <br /> Line Your AI
+              should not Either
+            </h1>
 
-          <p className="mt-3 text-[15px] -tracking-[0.5px] text-white/80">
-            Relic ai lets you run multiple AI chat nodes simultaneously switch
-            context <br /> instantly, compare responses, and stay in flow.
-          </p>
-          <div className="mx-auto flex w-4xl items-center justify-center">
-            <button className="mt-8 mr-3 flex cursor-pointer items-center gap-3 border border-white/10 px-8 py-1.5 text-[14px] font-medium -tracking-[0.5px] text-white">
-              See How it work <CiMemoPad />
-            </button>
-            <Link
-              href="/dashboard"
-              className="mt-8 flex items-center gap-3 bg-white/90 px-7 py-1.5 text-[14px] font-medium -tracking-[0.5px] text-black"
-            >
-              Get start now <MdArrowForward />
-            </Link>
-          </div>
+            <p className="mt-3 text-[9px] text-white/80 md:text-[15px] md:-tracking-[0.5px]">
+              Relic ai lets you run multiple AI chat nodes simultaneously switch
+              context <br /> instantly, compare responses, and stay in flow.
+            </p>
 
-          <div className="relative mt-10 inline-block p-0.5">
-            <span className="absolute top-0 left-0 h-4 w-4 border-t-2 border-l-2 border-white/70" />
+            <div className="mx-auto mt-4 flex w-full items-center justify-center md:mt-8 md:w-4xl">
+              <button className="mr-3 flex cursor-pointer items-center gap-1 border border-white/10 px-3 py-1 text-[10px] font-medium -tracking-[0.5px] text-white md:px-8 md:py-1.5 md:text-[14px]">
+                See How it work <CiMemoPad />
+              </button>
 
-            <span className="absolute top-0 right-0 h-4 w-4 border-t-2 border-r-2 border-white/70" />
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-1 bg-white/90 px-2 py-1 text-[10px] font-medium -tracking-[0.5px] text-black md:px-7 md:py-1.5 md:text-[14px]"
+              >
+                Get start now <MdArrowForward />
+              </Link>
+            </div>
 
-            <span className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-white/70" />
+            <div className="relative mx-auto mt-10 inline-block w-[330px] p-0.5 md:w-full md:max-w-2xl">
+              <span className="absolute top-0 left-0 h-2 w-2 border-t-2 border-l-2 border-white/70 md:h-4 md:w-4" />
+              <span className="absolute top-0 right-0 h-2 w-2 border-t-2 border-r-2 border-white/70 md:h-4 md:w-4" />
+              <span className="absolute bottom-0 left-0 h-2 w-2 border-b-2 border-l-2 border-white/70 md:h-4 md:w-4" />
+              <span className="absolute right-0 bottom-0 h-2 w-2 border-r-2 border-b-2 border-white/70 md:h-4 md:w-4" />
 
-            <span className="absolute right-0 bottom-0 h-4 w-4 border-r-2 border-b-2 border-white/70" />
+              <div className="w-full backdrop-blur-md">
+                <div className="relative flex flex-col border border-white/10 shadow-xl">
+                  <textarea
+                    className="h-10 w-full resize-none bg-transparent px-3 pt-2 text-[8px] leading-relaxed text-white placeholder-white/80 outline-none md:h-20 md:px-4 md:pt-4 md:text-[14px]"
+                    rows={3}
+                    placeholder={currentPlaceholder + '|'}
+                  />
 
-            <div className="w-2xl text-left backdrop-blur-md">
-              <div className="relative flex flex-col border border-white/10 shadow-xl">
-                <textarea
-                  className="w-full resize-none bg-transparent px-5 py-3 text-[13px] leading-relaxed text-white placeholder-white/80 outline-none"
-                  rows={2}
-                  placeholder={currentPlaceholder + '|'}
-                />
-                <div className="flex items-center justify-between rounded-b-md border-t border-[#191919] px-4 py-2">
-                  <div className="flex items-center gap-2 text-[12px] font-medium text-white">
-                    <span className="flex items-center justify-center gap-1 border border-[#191919] px-2 py-0.5">
-                      <FcGoogle size={14} />
-                      Gemma-2
-                      <IoIosArrowDown />
-                    </span>
-                  </div>
+                  <div className="flex flex-row items-center justify-between border-t border-[#191919] px-3 py-1 sm:px-4 md:py-2">
+                    <div className="flex items-center">
+                      <button className="flex items-center gap-1 rounded-sm border border-[#191919] px-2 py-1 text-[8px] font-medium text-white transition-colors hover:bg-white/5 md:gap-2 md:text-[12px]">
+                        <FcGoogle className="text-[9px] md:text-[14px]" />
+                        <span>Gemma 2</span>
+                        <IoIosArrowDown className="opacity-70" />
+                      </button>
+                    </div>
 
-                  <div className="flex gap-2">
-                    <span className="flex items-center justify-center border border-[#191919] p-[6px] text-[13px]">
-                      <MdOutlineFullscreenExit />
-                    </span>
-                    <span className="flex items-center justify-center border border-[#191919] p-[6px] text-[13px]">
-                      <IoMicOutline />
-                    </span>{' '}
-                    <span className="flex items-center justify-center border border-[#191919] p-[6px] text-[13px]">
-                      <IoAddOutline />
-                    </span>
-                    <button className="flex h-7 w-7 items-center justify-center rounded-[2px] bg-white text-black transition-colors hover:bg-gray-200">
-                      <IoMdArrowUp />
-                    </button>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <button className="flex h-6 w-6 items-center justify-center rounded-[2px] border border-[#191919] text-white transition-colors hover:bg-white/5 sm:h-7 sm:w-7">
+                          <MdOutlineFullscreenExit className="text-[13px] md:text-[18px]" />
+                        </button>
+
+                        <button className="flex h-6 w-6 items-center justify-center rounded-[2px] border border-[#191919] text-white transition-colors hover:bg-white/5 sm:h-7 sm:w-7">
+                          <IoMicOutline className="text-[13px] md:text-[18px]" />
+                        </button>
+
+                        <button className="flex h-6 w-6 items-center justify-center rounded-[2px] border border-[#191919] text-white transition-colors hover:bg-white/5 sm:h-7 sm:w-7">
+                          <IoAddOutline className="text-[13px] md:text-[18px]" />
+                        </button>
+                      </div>
+
+                      <button className="flex h-5 w-5 items-center justify-center rounded-[2px] bg-white text-black transition-transform hover:scale-105 active:scale-95 sm:h-7 sm:w-7">
+                        <IoMdArrowUp className="text-[13px] md:text-[18px]" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+          <div className="mt-120 md:hidden">
+            <img
+              src="https://i.pinimg.com/originals/ae/2a/97/ae2a97eec70c47a66870096e5801cb47.gif"
+              alt=""
+              className="w-30 opacity-35"
+            />
+          </div>
+        </div>
+        <div className="hidden md:flex">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 h-35 bg-gradient-to-t from-black to-transparent" />
         </div>
       </div>
     </section>
