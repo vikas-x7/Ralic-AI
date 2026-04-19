@@ -59,7 +59,7 @@ export default function LoginPage({ error }: LoginPageProps) {
     }
 
     setActiveProvider(providerId);
-    void signIn(providerId, { callbackUrl: '/dashboard' });
+    void signIn(providerId, { callbackUrl: '/chat' });
   }
 
   return (

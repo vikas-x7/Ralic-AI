@@ -73,7 +73,7 @@ export default function DashboardSearch({ onClose }: DashboardSearchProps) {
   ]);
 
   const handleOpenChat = (chatId: string) => {
-    router.push(`/dashboard/chat/${chatId}`);
+    router.push(`/chat/${chatId}`);
     onClose();
   };
 

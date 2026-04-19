@@ -78,7 +78,7 @@ export default function Hero() {
               </button>
 
               <Link
-                href="/dashboard"
+                href="/chat"
                 className="flex items-center gap-1 bg-white/90 px-2 py-1 text-[10px] font-medium -tracking-[0.5px] text-black md:px-7 md:py-1.5 md:text-[14px]"
               >
                 Get start now <MdArrowForward />

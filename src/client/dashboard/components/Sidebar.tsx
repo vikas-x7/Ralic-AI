@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import {
   FiEdit2,
@@ -29,19 +30,20 @@ interface SidebarProps {
 export default function Sidebar({ onOpenSearch }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const activeChatId = pathname.match(/^\/dashboard\/chat\/([^/]+)/)?.[1];
+  const activeChatId = pathname.match(/^\/chat\/([^/]+)/)?.[1];
   const [isOpen, setIsOpen] = useState(true);
   const [menuChatId, setMenuChatId] = useState<string | null>(null);
   const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<Chat | null>(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const utils = trpc.useUtils();
   const chatsQuery = trpc.chat.getChats.useQuery();
   const userQuery = trpc.auth.getUser.useQuery();
   const createChatMutation = trpc.chat.createChat.useMutation({
     onSuccess: (chat) => {
       void utils.chat.getChats.invalidate();
-      router.push(`/dashboard/chat/${chat.id}`);
+      router.push(`/chat/${chat.id}`);
     },
   });
   const renameChatMutation = trpc.chat.renameChat.useMutation({
@@ -116,7 +118,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
     },
     onSuccess: (_, variables) => {
       if (activeChatId === variables.chatId) {
-        router.push('/dashboard');
+        router.push('/chat');
       }
     },
     onSettled: async () => {
@@ -142,7 +144,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
   };
 
   const handleChatClick = (chatId: string) => {
-    router.push(`/dashboard/chat/${chatId}`);
+    router.push(`/chat/${chatId}`);
   };
 
   const startRename = (chat: Chat) => {
@@ -369,6 +371,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
             <FiLogOut
               className="cursor-pointer text-white/40 hover:text-white"
               size={18}
+              onClick={() => setShowLogoutConfirm(true)}
             />
           </div>
         </div>
@@ -406,6 +409,33 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
                 className="rounded-[6px] bg-red-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {deleteChatMutation.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-[360px] rounded-[10px] bg-[#151515] p-4 text-white shadow-2xl shadow-black/60">
+            <h2 className="text-[15px] font-medium">Logout</h2>
+            <p className="mt-2 text-sm leading-6 text-white/50">
+              Are you sure you want to logout?
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="rounded-[6px] px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="rounded-[6px] bg-red-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-400"
+              >
+                Logout
               </button>
             </div>
           </div>

@@ -65,7 +65,7 @@ export default function EventsSection() {
         ].map((item, idx) => (
           <div
             key={idx}
-            className="group rounded-[3px] bg-white/10 transition-colors"
+            className="group rounded-[3px] bg-white/5 transition-colors"
           >
             <div className="p-6">
               <span className="text-[32px] font-light -tracking-[2px] text-white md:text-[48px]">

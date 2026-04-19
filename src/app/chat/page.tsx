@@ -2,12 +2,12 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/server/auth';
 import { db } from '@/server/db';
 
-export default async function DashboardPage() {
+export default async function ChatPage() {
   const session = await auth();
   const userId = session?.user?.id;
 
   if (!userId) {
-    redirect('/auth');
+    redirect('/login');
   }
 
   const emptyChat = await db.chat.findFirst({
@@ -24,7 +24,7 @@ export default async function DashboardPage() {
   });
 
   if (emptyChat) {
-    redirect(`/dashboard/chat/${emptyChat.id}`);
+    redirect(`/chat/${emptyChat.id}`);
   }
 
   const chat = await db.chat.create({
@@ -37,5 +37,5 @@ export default async function DashboardPage() {
     },
   });
 
-  redirect(`/dashboard/chat/${chat.id}`);
+  redirect(`/chat/${chat.id}`);
 }
