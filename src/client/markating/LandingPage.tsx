@@ -1,22 +1,25 @@
 'use client';
-import EventsSection from './EventsSection';
+import FeaturesSection from './FeaturesSection';
 import Footer from './Footer';
-import ComplexitySection from './ComplexitySection';
+import DemoVideoSection from './DemoVideoSection';
 import Faq from './Faq';
-import Getstart from './Getstart';
+import CTASection from './CTASection';
 import Navbar from './Navbar';
 import Hero from './Hero';
-import CaseStudy from '@/client/markating/CaseStudy';
+
+import CanvasShowcase from '@/client/markating/CanvasShowcase';
 
 export default function LandingPage() {
   return (
     <div className="relative flex flex-col bg-black text-white">
       <Navbar />
       <Hero />
-      <ComplexitySection />
-      <EventsSection />
-      <Getstart />
-      {/* <Faq /> */}
+      <DemoVideoSection />
+
+      <FeaturesSection />
+      <CanvasShowcase />
+      <Faq />
+      <CTASection />
 
       <Footer />
     </div>

@@ -171,6 +171,12 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
 
   return (
     <div className="group relative w-[750px] rounded-[8px] border border-[#303030] bg-[#121212] shadow-xl transition-all">
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="opacity-0"
+        style={{ top: 0, left: '50%', transform: 'translateX(-50%)' }}
+      />
       <div className="flex items-center justify-between border-b border-[#1f1f1f] p-3 py-4" />
 
       {messages.length > 0 && (

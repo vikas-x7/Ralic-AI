@@ -2,26 +2,27 @@
 
 /* Custom Scrollbar for dark theme */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #111;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3e3e3e;
+  background: #555;
   border-radius: 10px;
+  border: 2px solid #111;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555555;
+  background: #777;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3e3e3e transparent;
+  scrollbar-color: #555 #111;
 }
 
 @keyframes marquee {
@@ -47,4 +48,9 @@
 }
 .animate-marquee:hover {
   animation-play-state: paused;
+}
+@layer base {
+  ::selection {
+    @apply bg-[#4B61D1] text-white;
+  }
 }

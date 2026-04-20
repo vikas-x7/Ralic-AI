@@ -3,19 +3,11 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
-import { IoIosArrowDown, IoMdArrowUp } from 'react-icons/io';
-import EventsSection from './EventsSection';
-import Footer from './Footer';
-
-import ComplexitySection from '@/client/markating/ComplexitySection';
-import Faq from '@/client/markating/Faq';
+import { IoIosArrowDown, IoMdArrowUp, IoMdPlay } from 'react-icons/io';
 import { MdArrowForward, MdOutlineFullscreenExit } from 'react-icons/md';
 import { CiMemoPad } from 'react-icons/ci';
 import { IoAddOutline, IoMicOutline } from 'react-icons/io5';
-import Getstart from './Getstart';
-import Navbar from './Navbar';
 import { FcGoogle } from 'react-icons/fc';
-import MarqueeSection from '@/client/markating/MarqueeSection';
 
 export default function Hero() {
   const placeholders = [
@@ -56,10 +48,10 @@ export default function Hero() {
   return (
     <section className="relative">
       <div className="md:mt z-10 mt-30 flex items-start justify-center text-center md:mt-0">
-        <div className="relative flex w-full items-center justify-center overflow-hidden border-white/10 md:h-screen md:w-[90vw] md:border-x">
+        <div className="relative flex w-full items-center justify-center overflow-hidden border-dashed border-white/10 md:h-screen md:w-[90vw] md:border-x">
           <div className="w-full flex-col items-center justify-center">
-            <p className="mb-2 inline-block rounded-4xl border border-white/10 px-4 py-1 text-[10px] tracking-[0] backdrop-blur-md md:mb-6 md:px-4 md:py-1.5 md:text-[12px] md:-tracking-[0.5px]">
-              Multiple AI conversations, one powerful workspace
+            <p className="mb-2 inline-block rounded-4xl border border-white/10 px-4 py-1 text-[10px] tracking-[0] backdrop-blur-md md:mb-6 md:px-4 md:py-1.5 md:text-[12px] md:-tracking-[0.1px]">
+              A canvas where every thought gets its own space to grow
             </p>
 
             <h1 className="text-[23px] leading-7 font-medium -tracking-[1.5px] text-white/95 md:text-3xl md:text-[54px] md:leading-14 md:-tracking-[4px]">
@@ -68,13 +60,21 @@ export default function Hero() {
             </h1>
 
             <p className="mt-3 text-[9px] text-white/80 md:text-[15px] md:-tracking-[0.5px]">
-              Relic ai lets you run multiple AI chat nodes simultaneously switch
-              context <br /> instantly, compare responses, and stay in flow.
+              Relic AI gives your ideas a canvas. Start a conversation, branch
+              mid-thought, and build a living <br /> map of your thinking
+              without ever losing context or starting over.
             </p>
 
             <div className="mx-auto mt-4 flex w-full items-center justify-center md:mt-8 md:w-4xl">
-              <button className="mr-3 flex cursor-pointer items-center gap-1 border border-white/10 px-3 py-1 text-[10px] font-medium -tracking-[0.5px] text-white md:px-8 md:py-1.5 md:text-[14px]">
-                See How it work <CiMemoPad />
+              <button
+                onClick={() =>
+                  document
+                    .getElementById('demo-video')
+                    ?.scrollIntoView({ behavior: 'smooth' })
+                }
+                className="mr-3 flex cursor-pointer items-center gap-1 border border-white/10 px-3 py-1 text-[10px] font-medium -tracking-[0.5px] text-white md:px-8 md:py-1.5 md:text-[14px]"
+              >
+                See How it work
               </button>
 
               <Link
