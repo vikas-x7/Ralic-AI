@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   title: 'Relic AI | Node based AI ',
   description:
     'A canvas-based AI thinking space where your ideas live as nodes, branch freely, and never get lost. Think without limits  your canvas never forgets.',
+  verification: {
+    google: 'kF0zawFyb56bCJymLSKydsR14_q0i1Hvdg0UAHj-0Fw',
+  },
 };
 
 export default function RootLayout({

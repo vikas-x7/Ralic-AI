@@ -93,7 +93,7 @@ export default function LoginPage({ error }: LoginPageProps) {
             <h1 className="flex items-center gap-2 text-[30px] font-medium -tracking-[1.5px]">
               Welcome to Relic AI
             </h1>
-            <p className="mt-1 text-[12px] text-white/50">
+            <p className="mt-1 text-center text-[12px] text-white/50">
               Your ideas, your nodes, your branches all waiting for you. Sign in
               to continue.
             </p>
