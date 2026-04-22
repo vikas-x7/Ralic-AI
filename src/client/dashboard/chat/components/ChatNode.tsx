@@ -98,6 +98,22 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
     Partial<Record<number, 'like' | 'dislike'>>
   >({});
 
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as globalThis.Node)
+      ) {
+        setIsModelDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleCopy = (content: string, index: number) => {
     navigator.clipboard.writeText(content);
     setCopiedIndex(index);
@@ -281,13 +297,97 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
           />
 
           <div className="mt-3 flex cursor-pointer items-center justify-between text-white/70">
-            <div className="flex items-center gap-1">
+            <div className="relative flex items-center gap-1" ref={dropdownRef}>
               <button
-                className={`flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-3 py-0.5`}
+                onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+                className={`flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-3 py-0.5 transition-colors hover:bg-[#303030]`}
               >
                 <FcGoogle size={14} />
-                <span>Gemma-2</span>
+                <span>Gemma 2</span>
+                <FiChevronDown size={14} className="ml-1 opacity-50" />
               </button>
+
+              {isModelDropdownOpen && (
+                <div className="absolute bottom-[calc(100%+8px)] left-0 z-50 w-52 rounded-[8px] border border-[#303030] bg-[#1a1a1a] p-1.5 shadow-2xl">
+                  <button className="flex w-full items-center justify-between rounded-[5px] px-2 py-1.5 text-left text-[13px] text-white hover:bg-[#303030]">
+                    <div className="flex items-center gap-2">
+                      <FcGoogle size={14} />
+                      <span>Gemma-2</span>
+                    </div>
+                    <FiCheck size={12} className="text-white/50" />
+                  </button>
+
+                  <div className="my-1.5 h-[1px] w-full bg-[#303030]/50" />
+
+                  <button
+                    disabled
+                    className="flex w-full items-center justify-between rounded-[5px] px-2 py-1.5 text-left text-[13px] text-white/50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <img
+                        src="https://thesvg.org/icons/minimax/default.svg"
+                        alt="Minimax"
+                        className="h-4 w-4 rounded-[3px] object-contain opacity-70"
+                      />
+                      <span>Minimax</span>
+                    </div>
+                    <span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-white/40">
+                      coming soon
+                    </span>
+                  </button>
+
+                  <button
+                    disabled
+                    className="flex w-full items-center justify-between rounded-[5px] px-2 py-1.5 text-left text-[13px] text-white/50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <img
+                        src="https://thesvg.org/icons/kimi/default.svg"
+                        alt="Kimi"
+                        className="h-4 w-4 rounded-[3px] object-contain opacity-70"
+                      />
+                      <span>Kimi</span>
+                    </div>
+                    <span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-white/40">
+                      coming soon
+                    </span>
+                  </button>
+
+                  <button
+                    disabled
+                    className="flex w-full items-center justify-between rounded-[5px] px-2 py-1.5 text-left text-[13px] text-white/50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <img
+                        src="https://thesvg.org/icons/deepseek/default.svg"
+                        alt="DeepSeek"
+                        className="h-4 w-4 rounded-[3px] object-contain opacity-70"
+                      />
+                      <span>DeepSeek</span>
+                    </div>
+                    <span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-white/40">
+                      coming soon
+                    </span>
+                  </button>
+
+                  <button
+                    disabled
+                    className="flex w-full items-center justify-between rounded-[5px] px-2 py-1.5 text-left text-[13px] text-white/50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <img
+                        src="https://thesvg.org/icons/mistral/default.svg"
+                        alt="Mistral"
+                        className="h-4 w-4 rounded-[3px] object-contain opacity-70"
+                      />
+                      <span>Mistral</span>
+                    </div>
+                    <span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-white/40">
+                      coming soon
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">

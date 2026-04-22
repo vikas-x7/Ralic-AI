@@ -40,20 +40,26 @@ const Footer = () => {
             {/* Social Icons using React Icons */}
             <div className="flex items-center gap-3">
               <Link
-                href="#"
+                href="https://x.com/Relic__ai"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-[2px] border border-white/10 text-white/50 transition-all hover:bg-white/5 hover:text-white"
               >
                 <FaXTwitter size={14} />
               </Link>
               <Link
-                href="#"
+                href="https://www.linkedin.com/company/relic-ai/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-[2px] border border-white/10 text-white/50 transition-all hover:bg-white/5 hover:text-white"
               >
                 <FaLinkedinIn size={14} />
               </Link>
 
               <Link
-                href="#"
+                href="https://www.instagram.com/relic__ai/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-[2px] border border-white/10 text-white/50 transition-all hover:bg-white/5 hover:text-white"
               >
                 <FaInstagram size={14} />
