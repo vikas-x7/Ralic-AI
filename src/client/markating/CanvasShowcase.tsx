@@ -235,7 +235,9 @@ const FlowPreview = ({
       fitView
       fitViewOptions={{ padding: 0.15 }}
       panOnDrag
-      zoomOnScroll
+      zoomOnScroll={false}
+      zoomOnPinch
+      preventScrolling={false}
       nodesDraggable
       nodesConnectable={false}
       proOptions={{ hideAttribution: true }}

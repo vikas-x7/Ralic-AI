@@ -417,7 +417,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
 
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-[360px] rounded-[10px] bg-[#151515] p-4 text-white shadow-2xl shadow-black/60">
+          <div className="w-full max-w-[360px] rounded-[5px] bg-[#151515] p-4 text-white shadow-2xl shadow-black/60">
             <h2 className="text-[15px] font-medium">Logout</h2>
             <p className="mt-2 text-sm leading-6 text-white/50">
               Are you sure you want to logout?
@@ -433,7 +433,7 @@ export default function Sidebar({ onOpenSearch }: SidebarProps) {
               <button
                 type="button"
                 onClick={() => signOut({ callbackUrl: '/' })}
-                className="rounded-[6px] bg-red-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-400"
+                className="rounded-[3px] bg-red-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-400"
               >
                 Logout
               </button>

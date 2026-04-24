@@ -26,6 +26,7 @@ import type { ChatMessage } from './FullscreenChat';
 import MessageContent from './MessageContent';
 import { FcGoogle } from 'react-icons/fc';
 import { LiaLinkSolid } from 'react-icons/lia';
+import { IoMicSharp } from 'react-icons/io5';
 
 export type ChatNodeData = {
   customId: string;
@@ -44,6 +45,7 @@ export type ChatNodeData = {
   onExpand?: (nodeId: string) => void;
   onFocusNode?: (nodeId: string) => void;
   onRequestDelete?: (nodeId: string) => void;
+  canDelete?: boolean;
   onTextSelection?: (
     nodeId: string,
     selectedText: string,
@@ -210,9 +212,25 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
                 <span className="mb-1 block text-[19px] font-medium text-white/30"></span>
               )}
               {msg.status === 'pending' && !msg.content ? (
-                <span className="inline-flex items-center text-white/45">
-                  Thinking
-                  <span className="stream-thinking-dots" />
+                <span className="inline-flex items-center gap-1.5 py-2">
+                  <span
+                    className="h-2 w-2 animate-pulse rounded-full bg-white/40"
+                    style={{ animationDelay: '0ms', animationDuration: '1.2s' }}
+                  />
+                  <span
+                    className="h-2 w-2 animate-pulse rounded-full bg-white/40"
+                    style={{
+                      animationDelay: '200ms',
+                      animationDuration: '1.2s',
+                    }}
+                  />
+                  <span
+                    className="h-2 w-2 animate-pulse rounded-full bg-white/40"
+                    style={{
+                      animationDelay: '400ms',
+                      animationDuration: '1.2s',
+                    }}
+                  />
                 </span>
               ) : (
                 <>
@@ -300,19 +318,29 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
             <div className="relative flex items-center gap-1" ref={dropdownRef}>
               <button
                 onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
-                className={`flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-3 py-0.5 transition-colors hover:bg-[#303030]`}
+                className={`flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-2 py-0.75 transition-colors hover:bg-[#303030]`}
               >
                 <FcGoogle size={14} />
-                <span>Gemma 2</span>
-                <FiChevronDown size={14} className="ml-1 opacity-50" />
+                <span>Gemma 2 </span>
+                <FiChevronDown size={14} className="opacity-50" />
               </button>
+
+              <div className="nodrag nopan relative">
+                <button className="peer flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] transition-colors hover:bg-[#303030] hover:text-white">
+                  <IoMicSharp size={18} />
+                </button>
+                <div className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-[200] -translate-x-1/2 rounded-[5px] border border-white/10 bg-[#1a1a1a] px-2.5 py-1.5 text-[11px] whitespace-nowrap text-white/70 opacity-0 shadow-xl transition-opacity duration-150 peer-hover:opacity-100">
+                  This feature is under Development phase
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1a1a1a]" />
+                </div>
+              </div>
 
               {isModelDropdownOpen && (
                 <div className="absolute bottom-[calc(100%+8px)] left-0 z-50 w-52 rounded-[8px] border border-[#303030] bg-[#1a1a1a] p-1.5 shadow-2xl">
                   <button className="flex w-full items-center justify-between rounded-[5px] px-2 py-1.5 text-left text-[13px] text-white hover:bg-[#303030]">
                     <div className="flex items-center gap-2">
                       <FcGoogle size={14} />
-                      <span>Gemma-2</span>
+                      <span>Gemma 2</span>
                     </div>
                     <FiCheck size={12} className="text-white/50" />
                   </button>
@@ -391,9 +419,15 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
             </div>
 
             <div className="flex items-center gap-2">
-              <button className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] transition-colors hover:bg-[#303030] hover:text-white">
-                <LiaLinkSolid size={18} />
-              </button>
+              <div className="nodrag nopan relative">
+                <button className="peer flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] transition-colors hover:bg-[#303030] hover:text-white">
+                  <LiaLinkSolid size={18} />
+                </button>
+                <div className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-[200] -translate-x-1/2 rounded-[5px] border border-white/10 bg-[#1a1a1a] px-2.5 py-1.5 text-[11px] whitespace-nowrap text-white/70 opacity-0 shadow-xl transition-opacity duration-150 peer-hover:opacity-100">
+                  This feature is under Development phase
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1a1a1a]" />
+                </div>
+              </div>
 
               <button
                 onClick={() => onExpand?.(customId)}
@@ -403,21 +437,23 @@ export default function ChatNode({ data }: NodeProps<Node<ChatNodeData>>) {
                 <BsArrowsFullscreen size={14} />
               </button>
 
-              <button
-                onClick={() => onRequestDelete?.(customId)}
-                className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] text-white/60 transition-colors hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-200"
-                title="Delete node"
-              >
-                <FiTrash2 size={15} />
-              </button>
+              {data.canDelete !== false && (
+                <button
+                  onClick={() => onRequestDelete?.(customId)}
+                  className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] text-white/60 transition-colors hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-200"
+                  title="Delete node"
+                >
+                  <FiTrash2 size={15} />
+                </button>
+              )}
 
               {isStreaming ? (
                 <button
                   onClick={() => onStop?.(customId)}
-                  className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/80 active:scale-90"
+                  className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white/20 text-red-500 transition-all hover:bg-white/80 active:scale-90"
                   title="Stop generating"
                 >
-                  <FiSquare size={14} className="fill-current" />
+                  <FiSquare size={18} className="fill-current" />
                 </button>
               ) : (
                 <button

@@ -162,6 +162,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
   const [activeNodeId, setActiveNodeId] = useState(initialNodes[0].id);
   const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null);
+  const [nodeToDelete, setNodeToDelete] = useState<string | null>(null);
   const [textSelectionAction, setTextSelectionAction] =
     useState<TextSelectionAction | null>(null);
   const [nodeMessages, setNodeMessages] = useState<
@@ -174,9 +175,11 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   const setNodesRef = useRef<Dispatch<
     SetStateAction<Node<ChatNodeData>[]>
   > | null>(null);
+  const setEdgesRef = useRef<Dispatch<SetStateAction<Edge[]>> | null>(null);
   const {
     getZoom,
     getNode,
+    getNodes,
     setCenter,
     fitView,
     zoomIn,
@@ -456,6 +459,30 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     setExpandedNodeId(null);
   }, []);
 
+  const handleDeleteNode = useCallback(
+    (nodeId: string) => {
+      if (getNodes().length <= 1) return;
+      setNodeToDelete(nodeId);
+    },
+    [getNodes]
+  );
+
+  const confirmDeleteNode = useCallback(() => {
+    if (!nodeToDelete) return;
+
+    setNodesRef.current?.((nds) => {
+      if (nds.length <= 1) return nds;
+      return nds.filter((n) => n.data.customId !== nodeToDelete);
+    });
+    setEdgesRef.current?.((eds) =>
+      eds.filter((e) => e.source !== nodeToDelete && e.target !== nodeToDelete)
+    );
+    setActiveNodeId((prev) =>
+      prev === nodeToDelete ? initialNodes[0].id : prev
+    );
+    setNodeToDelete(null);
+  }, [nodeToDelete]);
+
   const handleTextSelection = useCallback(
     (nodeId: string, selectedText: string, selectionRect: DOMRect) => {
       const text = selectedText.trim();
@@ -494,6 +521,8 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           onStop: handleStop,
           onExpand: handleExpand,
           onFocusNode: handleNodeFocus,
+          onRequestDelete: handleDeleteNode,
+          canDelete: nextNodes.length > 1,
           onTextSelection: handleTextSelection,
         },
       })),
@@ -504,6 +533,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       handleStop,
       handleExpand,
       handleNodeFocus,
+      handleDeleteNode,
       handleTextSelection,
     ]
   );
@@ -617,15 +647,24 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
 
     const id = crypto.randomUUID();
 
-    // Place the new node where the "New node" popup is on screen
-    const flowPos = screenToFlowPosition({
-      x: textSelectionAction.x,
-      y: textSelectionAction.y,
-    });
-    const newNodePosition = {
-      x: flowPos.x - CHAT_NODE_WIDTH / 2,
-      y: flowPos.y,
-    };
+    const sourceNode = getNode(textSelectionAction.sourceNodeId);
+    let newNodePosition = { x: 0, y: 0 };
+
+    if (sourceNode) {
+      newNodePosition = {
+        x: sourceNode.position.x + CHAT_NODE_WIDTH + NEW_NODE_HORIZONTAL_GAP,
+        y: sourceNode.position.y + NEW_NODE_VERTICAL_GAP,
+      };
+    } else {
+      const flowPos = screenToFlowPosition({
+        x: textSelectionAction.x,
+        y: textSelectionAction.y,
+      });
+      newNodePosition = {
+        x: flowPos.x - CHAT_NODE_WIDTH / 2,
+        y: flowPos.y,
+      };
+    }
 
     const newNode: Node<ChatNodeData> = {
       id,
@@ -639,6 +678,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
         onResponseHeightChange: handleResponseHeightChange,
         onSend: handleSend,
         onExpand: handleExpand,
+        onRequestDelete: handleDeleteNode,
         onTextSelection: handleTextSelection,
       },
     };
@@ -671,7 +711,9 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
       }
     );
   }, [
+    getNode,
     getZoom,
+    handleDeleteNode,
     handleExpand,
     handleResponseHeightChange,
     handleSend,
@@ -686,6 +728,10 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
   useEffect(() => {
     setNodesRef.current = setNodes;
   }, [setNodes]);
+
+  useEffect(() => {
+    setEdgesRef.current = setEdges;
+  }, [setEdges]);
 
   useEffect(() => {
     setNodes((nds) =>
@@ -755,9 +801,17 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           : (event.changedTouches?.[0]?.clientY ?? 0);
 
       const dropPosition = screenToFlowPosition({ x: clientX, y: clientY });
+
+      let nodeX = dropPosition.x;
+      if (targetHandle === CHAT_NODE_HANDLE_IDS.left) {
+        nodeX = dropPosition.x - 25; // 25 is the left offset of the handle
+      } else {
+        nodeX = dropPosition.x - CHAT_NODE_WIDTH + 25; // 25 is the right offset of the handle
+      }
+
       const newNodePosition = {
-        x: dropPosition.x - CHAT_NODE_WIDTH / 2,
-        y: dropPosition.y,
+        x: nodeX,
+        y: dropPosition.y - 20, // 20 is the top offset of the handle
       };
 
       const newNode: Node<ChatNodeData> = {
@@ -771,6 +825,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           onResponseHeightChange: handleResponseHeightChange,
           onSend: handleSend,
           onExpand: handleExpand,
+          onRequestDelete: handleDeleteNode,
         },
       };
 
@@ -801,6 +856,7 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
     },
     [
       getZoom,
+      handleDeleteNode,
       handleUserInteraction,
       handleResponseHeightChange,
       handleSend,
@@ -997,6 +1053,11 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           onSend={handleSend}
           onStop={handleStop}
           onClose={handleCloseFullscreen}
+          onRequestDelete={(nodeId) => {
+            handleCloseFullscreen();
+            handleDeleteNode(nodeId);
+          }}
+          canDelete={nodes.length > 1}
           onTextSelection={handleTextSelection}
         />
       )}
@@ -1017,6 +1078,34 @@ function ChatCanvasInner({ chatId }: { chatId: string }) {
           <FiPlus size={15} />
           New node
         </button>
+      )}
+
+      {nodeToDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-[400px] rounded-[5px] bg-[#121212] p-6 shadow-2xl">
+            <h3 className="mb-2 text-xl font-semibold text-white">
+              Delete Node
+            </h3>
+            <p className="mb-6 text-[15px] text-white/60">
+              Are you sure you want to delete this node? This action cannot be
+              undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setNodeToDelete(null)}
+                className="rounded-[3px] border border-[#303030] bg-transparent px-4 py-2 text-[14px] font-medium text-white transition-colors hover:bg-[#202020]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteNode}
+                className="rounded-[3px] bg-red-600/90 px-4 py-2 text-[14px] font-medium text-white transition-colors hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

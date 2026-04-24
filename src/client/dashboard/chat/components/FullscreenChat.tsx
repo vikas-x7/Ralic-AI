@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BsArrowsAngleContract } from 'react-icons/bs';
 import { IoMdArrowUp } from 'react-icons/io';
+import { IoMicSharp } from 'react-icons/io5';
 import {
   FiChevronDown,
-  FiPlus,
-  FiMic,
+  FiTrash2,
   FiCopy,
   FiThumbsUp,
   FiThumbsDown,
@@ -16,7 +16,7 @@ import {
 } from 'react-icons/fi';
 import MessageContent from './MessageContent';
 import { FcGoogle } from 'react-icons/fc';
-import { LiaLinkSolid } from 'react-icons/lia';
+import { LiaLinkSolid as LinkIcon } from 'react-icons/lia';
 
 export interface ChatMessage {
   id?: string;
@@ -32,6 +32,8 @@ interface FullscreenChatProps {
   onSend: (nodeId: string, message: string) => void;
   onStop: (nodeId: string) => void;
   onClose: () => void;
+  onRequestDelete?: (nodeId: string) => void;
+  canDelete?: boolean;
   onTextSelection?: (
     nodeId: string,
     selectedText: string,
@@ -46,6 +48,8 @@ export default function FullscreenChat({
   onSend,
   onStop,
   onClose,
+  onRequestDelete,
+  canDelete,
   onTextSelection,
 }: FullscreenChatProps) {
   const [input, setInput] = useState('');
@@ -55,6 +59,21 @@ export default function FullscreenChat({
   const [feedback, setFeedback] = useState<
     Partial<Record<number, 'like' | 'dislike'>>
   >({});
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as globalThis.Node)
+      ) {
+        setIsModelDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleCopy = (content: string, index: number) => {
     navigator.clipboard.writeText(content);
@@ -147,7 +166,29 @@ export default function FullscreenChat({
                     className="rounded-2xl rounded-tl-sm px-4 py-3 text-[15px] leading-7 wrap-anywhere text-gray-300"
                   >
                     {msg.status === 'pending' && !msg.content ? (
-                      'Thinking...'
+                      <span className="inline-flex items-center gap-1.5 py-2">
+                        <span
+                          className="h-2 w-2 animate-pulse rounded-full bg-white/40"
+                          style={{
+                            animationDelay: '0ms',
+                            animationDuration: '1.2s',
+                          }}
+                        />
+                        <span
+                          className="h-2 w-2 animate-pulse rounded-full bg-white/40"
+                          style={{
+                            animationDelay: '200ms',
+                            animationDuration: '1.2s',
+                          }}
+                        />
+                        <span
+                          className="h-2 w-2 animate-pulse rounded-full bg-white/40"
+                          style={{
+                            animationDelay: '400ms',
+                            animationDuration: '1.2s',
+                          }}
+                        />
+                      </span>
                     ) : (
                       <MessageContent content={msg.content} />
                     )}
@@ -219,19 +260,122 @@ export default function FullscreenChat({
             />
 
             <div className="mt-3 flex cursor-pointer items-center justify-between text-white/70">
-              <div className="flex items-center gap-1">
+              <div
+                className="relative flex items-center gap-1"
+                ref={dropdownRef}
+              >
                 <button
-                  className={`flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-3 py-0.5 text-[13px]`}
+                  onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+                  className="flex items-center justify-center gap-2 rounded-[5px] border border-[#303030] px-2 py-1.5 text-[13px] transition-colors hover:bg-[#303030]"
                 >
-                  <FcGoogle size={14} />
+                  <FcGoogle size={17} className="mb-0.5" />
                   <span>Gemma 2</span>
+                  <FiChevronDown size={14} className="opacity-50" />
                 </button>
+
+                <div className="relative">
+                  <button className="peer flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] transition-colors hover:bg-[#303030] hover:text-white">
+                    <IoMicSharp size={18} />
+                  </button>
+                  <div className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-[200] -translate-x-1/2 rounded-[5px] border border-white/10 bg-[#1a1a1a] px-2.5 py-1.5 text-[11px] whitespace-nowrap text-white/70 opacity-0 shadow-xl transition-opacity duration-150 peer-hover:opacity-100">
+                    This feature is under Development phase
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1a1a1a]" />
+                  </div>
+                </div>
+
+                {isModelDropdownOpen && (
+                  <div className="absolute bottom-[calc(100%+8px)] left-0 z-50 w-52 rounded-[8px] border border-[#303030] bg-[#1a1a1a] p-1.5 shadow-2xl">
+                    <button className="flex w-full items-center justify-between rounded-[5px] px-2 py-1.5 text-left text-[13px] text-white hover:bg-[#303030]">
+                      <div className="flex items-center gap-2">
+                        <FcGoogle size={14} />
+                        <span>Gemma 2</span>
+                      </div>
+                      <FiCheck size={12} className="text-white/50" />
+                    </button>
+
+                    <div className="my-1.5 h-[1px] w-full bg-[#303030]/50" />
+
+                    <button
+                      disabled
+                      className="flex w-full items-center justify-between rounded-[5px] px-2 py-1.5 text-left text-[13px] text-white/50"
+                    >
+                      <div className="flex items-center gap-2">
+                        <img
+                          src="https://thesvg.org/icons/minimax/default.svg"
+                          alt="Minimax"
+                          className="h-4 w-4 rounded-[3px] object-contain opacity-70"
+                        />
+                        <span>Minimax</span>
+                      </div>
+                      <span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-white/40">
+                        Up coming
+                      </span>
+                    </button>
+
+                    <button
+                      disabled
+                      className="flex w-full items-center justify-between rounded-[5px] px-2 py-1.5 text-left text-[13px] text-white/50"
+                    >
+                      <div className="flex items-center gap-2">
+                        <img
+                          src="https://thesvg.org/icons/kimi/default.svg"
+                          alt="Kimi"
+                          className="h-4 w-4 rounded-[3px] object-contain opacity-70"
+                        />
+                        <span>Kimi</span>
+                      </div>
+                      <span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-white/40">
+                        Up coming
+                      </span>
+                    </button>
+
+                    <button
+                      disabled
+                      className="flex w-full items-center justify-between rounded-[5px] px-2 py-1.5 text-left text-[13px] text-white/50"
+                    >
+                      <div className="flex items-center gap-2">
+                        <img
+                          src="https://thesvg.org/icons/deepseek/default.svg"
+                          alt="DeepSeek"
+                          className="h-4 w-4 rounded-[3px] object-contain opacity-70"
+                        />
+                        <span>DeepSeek</span>
+                      </div>
+                      <span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-white/40">
+                        Up coming
+                      </span>
+                    </button>
+
+                    <button
+                      disabled
+                      className="flex w-full items-center justify-between rounded-[5px] px-2 py-1.5 text-left text-[13px] text-white/50"
+                    >
+                      <div className="flex items-center gap-2">
+                        <img
+                          src="https://thesvg.org/icons/mistral/default.svg"
+                          alt="Mistral"
+                          className="h-4 w-4 rounded-[3px] object-contain opacity-70"
+                        />
+                        <span>Mistral</span>
+                      </div>
+                      <span className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-white/40">
+                        Up coming
+                      </span>
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-2">
-                <button className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] transition-colors hover:bg-[#303030] hover:text-white">
-                  <LiaLinkSolid size={18} />
-                </button>
+                <div className="nodrag nopan relative">
+                  <button className="peer flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] transition-colors hover:bg-[#303030] hover:text-white">
+                    <LinkIcon size={18} />
+                  </button>
+                  <div className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-[200] -translate-x-1/2 rounded-[5px] border border-white/10 bg-[#1a1a1a] px-2.5 py-1.5 text-[11px] whitespace-nowrap text-white/70 opacity-0 shadow-xl transition-opacity duration-150 peer-hover:opacity-100">
+                    This feature is under Development phase
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1a1a1a]" />
+                  </div>
+                </div>
 
                 <button
                   onClick={onClose}
@@ -241,10 +385,20 @@ export default function FullscreenChat({
                   <BsArrowsAngleContract size={14} />
                 </button>
 
+                {canDelete !== false && (
+                  <button
+                    onClick={() => onRequestDelete?.(nodeId)}
+                    className="nodrag nopan flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] border border-[#303030] text-white/60 transition-colors hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-200"
+                    title="Delete node"
+                  >
+                    <FiTrash2 size={15} />
+                  </button>
+                )}
+
                 {isStreaming ? (
                   <button
                     onClick={() => onStop(nodeId)}
-                    className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white text-black/90 transition-all hover:bg-white/80 active:scale-90"
+                    className="nodrag nopan ml-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-[5px] bg-white/20 text-red-500 transition-all hover:bg-white/80 active:scale-90"
                     title="Stop generating"
                   >
                     <FiSquare size={14} className="fill-current" />
