@@ -268,7 +268,7 @@ const CanvasShowcase = () => {
         <div className="flex w-full flex-col justify-center pr-3 pl-4 lg:sticky lg:w-2/5">
           <div className="mb-10">
             <div className="mb-4 flex items-center gap-2">
-              <div className="h-5 w-5 bg-white" />
+              <div className="mb-1 h-5 w-5 bg-white" />
               <h1 className="text-2xl tracking-tight">Relic AI Canvas</h1>
             </div>
             <p className="text-sm text-white/50 md:text-base">
