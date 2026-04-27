@@ -59,47 +59,53 @@ const faqs2 = [
 ];
 
 export default function FAQ() {
-  const [activeIndex, setActiveIndex] = useState<string | null>('1-0');
+  // Yahan '1-0' se badalkar null kar diya, ab koi bhi automatic open nahi hoga
+  const [activeIndex, setActiveIndex] = useState<string | null>(null);
 
   return (
-    <section id="faq">
-      <div className="mt-30 text-center">
-        <h1 className="text-5xl font-medium -tracking-[4px]">
+    <section id="faq" className="bg-black text-white">
+      <div className="mt-30 px-4 text-center">
+        <h1 className="text-4xl font-medium -tracking-[2px] md:text-5xl md:-tracking-[4px]">
           Frequently Asked Questions
         </h1>
-        <p className="mt-2 text-white/50">Everything to know about Relic AI</p>
+        <p className="mt-4 text-sm text-white/50 md:text-base">
+          Everything to know about Relic AI
+        </p>
       </div>
 
-      <div className="w-full gap-10 bg-black px-4 py-14 text-white sm:px-6 md:flex md:px-10 lg:px-16 lg:py-28">
-        <div className="w-full md:w-[65%]">
+      {/* Grid container responsive layout balanced */}
+      <div className="w-full gap-8 bg-black px-4 py-14 sm:px-6 md:grid md:grid-cols-2 md:px-10 lg:px-16 lg:py-24">
+        {/* Left Column */}
+        <div className="flex w-full flex-col gap-3">
           {faqs1.map((f, i) => {
             const id = `1-${i}`;
+            const isOpen = activeIndex === id;
             return (
-              <div key={i} className="mb-3">
+              <div key={i} className="w-full">
                 <button
-                  onClick={() => setActiveIndex(activeIndex === id ? null : id)}
-                  className="flex w-full items-center justify-between bg-[#0b0b0b] px-4 py-4 text-left"
+                  onClick={() => setActiveIndex(isOpen ? null : id)}
+                  className="flex w-full items-center justify-between rounded-[4px] border border-white/[0.03] bg-[#0b0b0b] px-5 py-4 text-left transition-colors hover:bg-[#121212]"
                 >
-                  <span className="pr-4 text-sm leading-6 sm:text-[15px] md:text-[16px]">
+                  <span className="pr-4 text-sm leading-6 font-medium sm:text-[15px] md:text-[16px]">
                     {f.question}
                   </span>
                   <span
-                    className={`shrink-0 text-xl transition-transform duration-300 ${
-                      activeIndex === id ? 'rotate-45' : ''
+                    className={`shrink-0 text-xl text-white/60 transition-transform duration-300 ${
+                      isOpen ? 'rotate-45 text-white' : ''
                     }`}
                   >
                     +
                   </span>
                 </button>
                 <div
-                  className={`grid transition-all duration-300 ${
-                    activeIndex === id
-                      ? 'grid-rows-[1fr] pb-4 opacity-100'
+                  className={`grid transition-all duration-300 ease-in-out ${
+                    isOpen
+                      ? 'mt-1 grid-rows-[1fr] opacity-100'
                       : 'grid-rows-[0fr] opacity-0'
                   }`}
                 >
-                  <div className="overflow-hidden">
-                    <p className="bg-[#0b0b0b] px-4 py-2 text-sm leading-7 text-white/60 md:text-base">
+                  <div className="overflow-hidden rounded-[4px] border border-white/[0.02] bg-[#0b0b0b]">
+                    <p className="px-5 py-4 text-[13px] leading-relaxed text-white/60 md:text-[14px]">
                       {f.answer}
                     </p>
                   </div>
@@ -109,35 +115,37 @@ export default function FAQ() {
           })}
         </div>
 
-        <div className="w-full md:w-[65%]">
+        {/* Right Column */}
+        <div className="mt-3 flex w-full flex-col gap-3 md:mt-0">
           {faqs2.map((f, i) => {
             const id = `2-${i}`;
+            const isOpen = activeIndex === id;
             return (
-              <div key={i} className="mb-3">
+              <div key={i} className="w-full">
                 <button
-                  onClick={() => setActiveIndex(activeIndex === id ? null : id)}
-                  className="flex w-full items-center justify-between bg-[#0b0b0b] px-4 py-4 text-left"
+                  onClick={() => setActiveIndex(isOpen ? null : id)}
+                  className="flex w-full items-center justify-between rounded-[4px] border border-white/[0.03] bg-[#0b0b0b] px-5 py-4 text-left transition-colors hover:bg-[#121212]"
                 >
-                  <span className="pr-4 text-sm leading-6 sm:text-[15px] md:text-[16px]">
+                  <span className="pr-4 text-sm leading-6 font-medium sm:text-[15px] md:text-[16px]">
                     {f.question}
                   </span>
                   <span
-                    className={`shrink-0 text-xl transition-transform duration-300 ${
-                      activeIndex === id ? 'rotate-45' : ''
+                    className={`shrink-0 text-xl text-white/60 transition-transform duration-300 ${
+                      isOpen ? 'rotate-45 text-white' : ''
                     }`}
                   >
                     +
                   </span>
                 </button>
                 <div
-                  className={`grid transition-all duration-300 ${
-                    activeIndex === id
-                      ? 'grid-rows-[1fr] pb-4 opacity-100'
+                  className={`grid transition-all duration-300 ease-in-out ${
+                    isOpen
+                      ? 'mt-1 grid-rows-[1fr] opacity-100'
                       : 'grid-rows-[0fr] opacity-0'
                   }`}
                 >
-                  <div className="overflow-hidden">
-                    <p className="bg-[#0b0b0b] px-4 py-2 text-sm leading-7 text-white/60 md:text-base">
+                  <div className="overflow-hidden rounded-[4px] border border-white/[0.02] bg-[#0b0b0b]">
+                    <p className="px-5 py-4 text-[13px] leading-relaxed text-white/60 md:text-[14px]">
                       {f.answer}
                     </p>
                   </div>

@@ -3,22 +3,28 @@ import { MdArrowOutward } from 'react-icons/md';
 
 export default function FeaturesSection() {
   return (
-    <div
-      id="usecases"
-      className="mx-auto mt-4 w-full px-4 pb-32 md:mt-20 md:px-24"
-    >
-      <div className="mb-12 flex flex-col items-start justify-center text-center">
-        <h2 className="mb-2 text-[25px] font-medium -tracking-[1px] text-white md:text-[42px]">
-          What Relic Can Do ?
-        </h2>
+    <div className="mx-auto w-full px-4 pb-32 md:px-18">
+      <div className="flex h-[90vh] flex-col items-center justify-between gap-12 border-x border-white/10 px-10 pt-16 pb-16 md:flex-row">
+        <div className="max-w-3xl">
+          <h2 className="text-[30px] leading-[1] font-normal -tracking-[3px] text-white md:text-[50px]">
+            Unify your fragmented thoughts with an infinite spatial canvas for{' '}
+            <span className="mt-2 inline-block rounded-[2px] bg-[#e6e6e5] px-2 py-0.5 font-normal text-black">
+              context and ideas.
+            </span>
+          </h2>
 
-        <p className="text-start text-[12px] -tracking-[0.2px] text-white/60 md:mb-6 md:w-3xl md:text-[15px]">
-          Everything you need to think freely - without losing context, without
-          starting over, <br /> and without being boxed into a single thread.
-        </p>
+          <div className="max-w-2xl md:mt-4">
+            <p className="text-[15px] leading-relaxed -tracking-[0.1px] text-white/60">
+              Stop losing your creative flow in separate tabs or isolated chats.
+              Thinking deeply usually means juggling scattered notes, lost
+              history, and broken threads Relic keeps your mind map connected
+              and permanently alive.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 shadow-2xl md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-[1px] md:grid-cols-2 lg:grid-cols-4">
         {[
           {
             number: '01',
@@ -75,9 +81,9 @@ export default function FeaturesSection() {
         ].map((item, idx) => (
           <div
             key={idx}
-            className="group rounded-[3px] bg-white/5 transition-colors"
+            className="group bg-black transition-colors" // bg-black se thin layout dikhega bina double borders ke
           >
-            <div className="p-6">
+            <div className="border border-white/10 p-6">
               <span className="text-[32px] font-light -tracking-[2px] text-white md:text-[48px]">
                 {item.number}
               </span>
@@ -102,29 +108,6 @@ export default function FeaturesSection() {
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="mt-20 flex flex-col items-start justify-between gap-8 pt-10 pb-10 md:flex-row">
-        <p className="max-w-md text-xl -tracking-[0.5px] text-white">
-          Your thinking, laid out exactly the way your mind works spatial,
-          connected, and always alive.
-        </p>
-
-        <div className="flex gap-8 sm:flex-row sm:gap-16">
-          <div>
-            <p className="text-xs text-white/40 uppercase">NODES CREATED</p>
-
-            <h2 className="mt-2 text-4xl text-white"> ~2k+</h2>
-          </div>
-
-          <div>
-            <p className="text-xs text-white/40 uppercase">THINKING SPACE</p>
-
-            <h2 className="mt-2 text-4xl -tracking-[0.5px] text-white">
-              Unlimited
-            </h2>
-          </div>
-        </div>
       </div>
     </div>
   );

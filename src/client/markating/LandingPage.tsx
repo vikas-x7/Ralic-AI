@@ -8,19 +8,20 @@ import Navbar from './Navbar';
 import Hero from './Hero';
 
 import CanvasShowcase from '@/client/markating/CanvasShowcase';
+import MarqueeSection from '@/client/markating/MarqueeSection';
 
 export default function LandingPage() {
   return (
     <div className="relative flex flex-col bg-black text-white">
       <Navbar />
       <Hero />
-      <DemoVideoSection />
-
+      <MarqueeSection />
       <FeaturesSection />
+      <DemoVideoSection />
       <CanvasShowcase />
+
       <Faq />
       <CTASection />
-
       <Footer />
     </div>
   );

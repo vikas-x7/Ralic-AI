@@ -133,10 +133,6 @@ export default function Hero() {
             </div>
           </div>
         </div>
-
-        <div className="hidden md:flex">
-          <div className="z- pointer-events-none absolute inset-x-0 bottom-0 h-35 bg-gradient-to-t from-black to-transparent" />
-        </div>
       </div>
     </section>
   );

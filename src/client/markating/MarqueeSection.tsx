@@ -1,51 +1,70 @@
 'use client';
 
-const marqueeImages = [
-  'https://thesvg.org/icons/gemini/default.svg',
-  'https://thesvg.org/icons/kimi/default.svg',
-  'https://thesvg.org/icons/minimax/default.svg',
-  'https://thesvg.org/icons/deepseek/default.svg',
-  'https://thesvg.org/icons/mistral/default.svg',
-  'https://thesvg.org/icons/gemini/default.svg',
-  'https://thesvg.org/icons/kimi/default.svg',
-  'https://thesvg.org/icons/gemini/default.svg',
-  'https://thesvg.org/icons/kimi/default.svg',
-  'https://thesvg.org/icons/minimax/default.svg',
-  'https://thesvg.org/icons/deepseek/default.svg',
-  'https://thesvg.org/icons/mistral/default.svg',
-  'https://thesvg.org/icons/gemini/default.svg',
-  'https://thesvg.org/icons/kimi/default.svg',
+const marqueeItemsData = [
+  { name: 'Gemini', src: 'https://thesvg.org/icons/gemini/default.svg' },
+  { name: 'Kimi', src: 'https://thesvg.org/icons/kimi/default.svg' },
+  { name: 'MiniMax', src: 'https://thesvg.org/icons/minimax/default.svg' },
+  { name: 'DeepSeek', src: 'https://thesvg.org/icons/deepseek/default.svg' },
+  { name: 'Mistral AI', src: 'https://thesvg.org/icons/mistral/default.svg' },
+  { name: 'Gemini', src: 'https://thesvg.org/icons/gemini/default.svg' },
+  { name: 'Kimi', src: 'https://thesvg.org/icons/kimi/default.svg' },
+  { name: 'Gemini', src: 'https://thesvg.org/icons/gemini/default.svg' },
+  { name: 'Kimi', src: 'https://thesvg.org/icons/kimi/default.svg' },
+  { name: 'MiniMax', src: 'https://thesvg.org/icons/minimax/default.svg' },
+  { name: 'DeepSeek', src: 'https://thesvg.org/icons/deepseek/default.svg' },
+  { name: 'Mistral AI', src: 'https://thesvg.org/icons/mistral/default.svg' },
+  { name: 'Gemini', src: 'https://thesvg.org/icons/gemini/default.svg' },
+  { name: 'Kimi', src: 'https://thesvg.org/icons/kimi/default.svg' },
 ];
 
 export default function MarqueeSection() {
-  const marqueeItems = [...marqueeImages, ...marqueeImages];
-
   return (
-    <section className="marquee-fade w-full max-w-full overflow-hidden py-4 backdrop-blur-md">
-      <div className="flex w-full overflow-hidden">
-        <div className="animate-marquee flex w-max min-w-max items-center">
-          {[0, 1].map((group) => (
-            <div
-              key={group}
-              className="flex shrink-0 items-center md:gap-1 md:pr-12"
-              aria-hidden={group === 1}
-            >
-              {marqueeItems.map((image, i) => (
-                <div
-                  key={`${group}-${i}`}
-                  className="flex h-10 w-16 shrink-0 items-center justify-center opacity-70 transition-opacity duration-300 hover:opacity-100 md:h-12 md:w-20"
-                >
-                  <img
-                    src={image}
-                    alt={group === 0 ? `logo-${i + 1}` : ''}
-                    className="h-6 w-auto max-w-full object-contain md:h-6"
-                  />
-                </div>
-              ))}
-            </div>
-          ))}
+    <>
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee-loop {
+          display: flex;
+          width: max-content;
+          animation: marquee 90s linear infinite;
+        }
+      `}</style>
+
+      <section className="w-full overflow-hidden border-y border-white/5 bg-black py-8">
+        <div className="relative w-full overflow-hidden">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-black to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-black to-transparent" />
+
+          <div className="animate-marquee-loop">
+            {[0, 1].map((group) => (
+              <div
+                key={group}
+                className="flex shrink-0 items-center gap-16 pr-16"
+                aria-hidden={group === 1}
+              >
+                {marqueeItemsData.map((item, i) => (
+                  <div
+                    key={`${group}-${i}`}
+                    className="flex shrink-0 items-center justify-center opacity-40 transition-opacity duration-300 hover:opacity-100"
+                  >
+                    <img
+                      src={item.src}
+                      alt={group === 0 ? `${item.name}-logo` : ''}
+                      className="h-6 w-auto max-w-full object-contain brightness-200 contrast-200 grayscale"
+                    />
+
+                    <span className="ml-3 text-[16px] font-medium tracking-tight text-white md:text-[18px]">
+                      {item.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

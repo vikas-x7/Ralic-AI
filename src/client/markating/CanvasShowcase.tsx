@@ -262,7 +262,7 @@ const CanvasShowcase = () => {
   };
 
   return (
-    <div className="bg-black text-white selection:bg-white/20">
+    <div className="border border-white/10 bg-black text-white selection:bg-white/20">
       <section className="mx-auto flex max-w-[1440px] flex-col items-stretch px-6 lg:flex-row">
         {/* LEFT SIDE */}
         <div className="flex w-full flex-col justify-center pr-3 pl-4 lg:sticky lg:w-2/5">
@@ -321,15 +321,15 @@ const CanvasShowcase = () => {
         </div>
 
         {/* RIGHT SIDE ReactFlow */}
-        <div className="relative flex w-full items-center justify-center overflow-hidden bg-[#0A0A0A] lg:h-[75vh] lg:w-3/5">
+        <div className="] relative flex w-full items-center justify-center overflow-hidden border-l border-white/10 lg:h-[75vh] lg:w-3/5">
           <div className="absolute inset-0">
-            <Image
+            {/* <Image
               width={1000}
               height={1000}
               src="/images/relicaicanvas.jpg"
               alt="background"
               className="h-full w-full object-cover opacity-40"
-            />
+            /> */}
           </div>
 
           <div className="relative z-10 h-full w-full">
